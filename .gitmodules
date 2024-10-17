@@ -1,0 +1,3 @@
+[submodule "ThirdParty/Flakkari"]
+	path = ThirdParty/Flakkari
+	url = git@github.com:MasterLaplace/Flakkari.git

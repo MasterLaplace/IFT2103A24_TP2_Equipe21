@@ -123,3 +123,5 @@ MonoBehaviour:
   projectileVelocity: 40
   fov: 90
   health: 100
+  playerCamera: {fileID: 0}
+  SkyBox: {fileID: 6653253499544507834, guid: 305efeaa570ec6d4fbdf45f05158981b, type: 3}

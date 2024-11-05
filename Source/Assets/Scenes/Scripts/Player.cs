@@ -10,15 +10,20 @@ public class Player : MonoBehaviour
     [SerializeField] private float fov = 90;
     [SerializeField] private int health = 100;
     [HideInInspector] public Camera playerCamera;
+    [SerializeField] private GameObject SkyBox;
+    private Vector3 mapLimit;
 
     public void SetupCameraViewport(Rect viewport)
     {
         if (fov < 1 || fov > 179)
             throw new System.ArgumentException("Field of view must be between 1 and 179 degrees");
 
+        mapLimit = SkyBox.transform.localScale / 2;
+
         playerCamera = new GameObject("PlayerCamera").AddComponent<Camera>();
         playerCamera.rect = viewport;
         playerCamera.fieldOfView = fov;
+        playerCamera.transform.position = RandomPosition();
 
         transform.position = playerCamera.transform.position;
 
@@ -98,6 +103,15 @@ public class Player : MonoBehaviour
             Debug.Log("Player died");
             Destroy(gameObject);
         }
+    }
+
+    private Vector3 RandomPosition()
+    {
+        float x = Random.Range(-mapLimit.x, mapLimit.x);
+        float y = Random.Range(-mapLimit.y, mapLimit.y);
+        float z = Random.Range(-mapLimit.z, mapLimit.z);
+
+        return new Vector3(x, y, z);
     }
 
     private void OnDrawGizmos()

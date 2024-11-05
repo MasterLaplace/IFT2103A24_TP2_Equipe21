@@ -6,6 +6,7 @@ public class InteractiveObject : MonoBehaviour
 {
     public GameObject projectilePrefab;
     [SerializeField] private float velocity = 10;
+    [SerializeField] private float projectileVelocity = 40;
     [SerializeField] private float fov = 90;
 
     void Start()
@@ -53,12 +54,12 @@ public class InteractiveObject : MonoBehaviour
         if (horizontal2 != 0)
             Camera.main.transform.Rotate(Vector3.forward, -horizontal2 * 100 * Time.deltaTime);
 
-        if (Input.GetMouseButtonDown(0) || Input.GetButtonDown("Fire3"))
+        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Joystick1Button5))
         {
             GameObject projectile = Instantiate(projectilePrefab, Camera.main.transform.position, Camera.main.transform.rotation);
 
             Rigidbody rb = projectile.GetComponent<Rigidbody>();
-            rb.velocity = Camera.main.transform.forward * velocity;
+            rb.velocity = Camera.main.transform.forward * projectileVelocity;
             Debug.Log("Projectile launched at " + rb.velocity + " m/s");
         }
     }

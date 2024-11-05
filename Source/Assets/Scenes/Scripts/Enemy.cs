@@ -13,6 +13,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float projectileVelocity = 40;
     [SerializeField] private float cooldown = 2f;
     private float lastShotTime;
+    private List<Player> players;
 
     void Start()
     {
@@ -26,20 +27,24 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
+        players = new List<Player>(FindObjectsOfType<Player>());
+
         if (IsOutOfBounds()) {
             ResolvedPosition();
             ChooseRandomDirection();
         }
 
-        if (IsObjectNear())
-            ChooseRandomDirection();
-        else if (IsPlayerNear())
+        Player nearestPlayer = FindNearestPlayer();
+
+        if (nearestPlayer != null && IsPlayerNear(nearestPlayer.transform.position))
         {
-            transform.position = Vector3.MoveTowards(transform.position, Camera.main.transform.position, speed * Time.deltaTime);
+            if (!IsPlayerNear(nearestPlayer.transform.position, 5f))
+                transform.position = Vector3.MoveTowards(transform.position, nearestPlayer.transform.position, speed * Time.deltaTime);
+
             if (Time.time - lastShotTime >= cooldown)
             {
                 GameObject projectile = Instantiate(projectilePrefab, transform.position + (2 * transform.forward), Quaternion.identity);
-                projectile.GetComponent<Rigidbody>().velocity = (Camera.main.transform.position - transform.position).normalized * projectileVelocity;
+                projectile.GetComponent<Rigidbody>().velocity = (nearestPlayer.transform.position - transform.position).normalized * projectileVelocity;
                 lastShotTime = Time.time;
             }
         }
@@ -96,13 +101,28 @@ public class Enemy : MonoBehaviour
         direction = new(x, y, z);
     }
 
-    private bool IsPlayerNear()
+    private Player FindNearestPlayer()
+
     {
-        return Vector3.Distance(transform.position, Camera.main.transform.position) < 20f;
+        Player nearestPlayer = null;
+        float minDistance = Mathf.Infinity;
+
+        foreach (Player player in players)
+        {
+            float distance = Vector3.Distance(transform.position, player.transform.position);
+
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                nearestPlayer = player;
+            }
+        }
+
+        return nearestPlayer;
     }
 
-    private bool IsObjectNear()
+    private bool IsPlayerNear(Vector3 playerPosition, float distance = 20f)
     {
-        return Vector3.Distance(transform.position, Camera.main.transform.position) < 5f;
+        return Vector3.Distance(transform.position, playerPosition) < distance;
     }
 }

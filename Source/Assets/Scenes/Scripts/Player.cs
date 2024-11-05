@@ -9,69 +9,85 @@ public class Player : MonoBehaviour
     [SerializeField] private float projectileVelocity = 40;
     [SerializeField] private float fov = 90;
     [SerializeField] private int health = 100;
+    [HideInInspector] public Camera playerCamera;
 
-    void Start()
+    public void SetupCameraViewport(Rect viewport)
     {
         if (fov < 1 || fov > 179)
             throw new System.ArgumentException("Field of view must be between 1 and 179 degrees");
 
-        Camera.main.fieldOfView = fov;
+        playerCamera = new GameObject("PlayerCamera").AddComponent<Camera>();
+        playerCamera.rect = viewport;
+        playerCamera.fieldOfView = fov;
 
-        Camera cameraPlayer2 = Instantiate(Camera.main);
-        cameraPlayer2.GetComponent<AudioListener>().enabled = false;
+        transform.position = playerCamera.transform.position;
 
-        Camera.main.rect = new Rect(0, 0.5f, 1, 0.5f);
-        cameraPlayer2.rect = new Rect(0, 0, 1, 0.5f);
+        if (Camera.main != null)
+            Camera.main.enabled = false;
 
-        transform.position = Camera.main.transform.position;
+        if (playerCamera.TryGetComponent<AudioListener>(out var audioListener))
+            audioListener.enabled = true;
     }
 
     void Update()
     {
+        HandleMovement();
+        HandleShooting();
+        SyncPositionWithCamera();
+    }
+
+    private void HandleMovement()
+    {
         if (Input.GetButton("Fire2"))
         {
-            Vector3 direction = Camera.main.transform.forward * velocity;
-            Camera.main.transform.position += direction * Time.deltaTime;
+            Vector3 direction = playerCamera.transform.forward * velocity;
+            playerCamera.transform.position += direction * Time.deltaTime;
         }
 
         if (Input.GetButton("Fire1"))
         {
-            Vector3 direction = Camera.main.transform.forward * velocity;
-            Camera.main.transform.position += -direction * Time.deltaTime;
+            Vector3 direction = playerCamera.transform.forward * velocity;
+            playerCamera.transform.position += -direction * Time.deltaTime;
         }
 
         if (Input.GetKey(KeyCode.W))
-            Camera.main.transform.position += Vector3.forward * Time.deltaTime;
+            playerCamera.transform.position += Vector3.forward * Time.deltaTime;
         if (Input.GetKey(KeyCode.S))
-            Camera.main.transform.position += Vector3.back * Time.deltaTime;
+            playerCamera.transform.position += Vector3.back * Time.deltaTime;
         if (Input.GetKey(KeyCode.A))
-            Camera.main.transform.position += Vector3.left * Time.deltaTime;
+            playerCamera.transform.position += Vector3.left * Time.deltaTime;
         if (Input.GetKey(KeyCode.D))
-            Camera.main.transform.position += Vector3.right * Time.deltaTime;
+            playerCamera.transform.position += Vector3.right * Time.deltaTime;
 
         if (Input.GetMouseButton(1))
         {
-            Camera.main.transform.Rotate(Vector3.up, Input.GetAxis("Mouse X"));
-            Camera.main.transform.Rotate(Vector3.right, -Input.GetAxis("Mouse Y"));
+            playerCamera.transform.Rotate(Vector3.up, Input.GetAxis("Mouse X"));
+            playerCamera.transform.Rotate(Vector3.right, -Input.GetAxis("Mouse Y"));
         }
 
         float horizontal2 = Input.GetAxis("Horizontal");
         float vertical2 = Input.GetAxis("Vertical");
 
         if (vertical2 != 0)
-            Camera.main.transform.Rotate(Vector3.right, -vertical2 * 100 * Time.deltaTime);
+            playerCamera.transform.Rotate(Vector3.right, -vertical2 * 100 * Time.deltaTime);
         if (horizontal2 != 0)
-            Camera.main.transform.Rotate(Vector3.forward, -horizontal2 * 100 * Time.deltaTime);
+            playerCamera.transform.Rotate(Vector3.forward, -horizontal2 * 100 * Time.deltaTime);
+    }
 
+    private void HandleShooting()
+    {
         if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Joystick1Button5))
         {
-            GameObject projectile = Instantiate(projectilePrefab, Camera.main.transform.position + (2 * Camera.main.transform.forward), Camera.main.transform.rotation);
+            GameObject projectile = Instantiate(projectilePrefab, playerCamera.transform.position + (2 * playerCamera.transform.forward), playerCamera.transform.rotation);
 
             Rigidbody rb = projectile.GetComponent<Rigidbody>();
-            rb.velocity = Camera.main.transform.forward * projectileVelocity;
+            rb.velocity = playerCamera.transform.forward * projectileVelocity;
         }
+    }
 
-        transform.position = Camera.main.transform.position;
+    private void SyncPositionWithCamera()
+    {
+        transform.position = playerCamera.transform.position;
     }
 
     public void TakeDamage(int damage)

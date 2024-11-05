@@ -50,10 +50,9 @@ public class Enemy : MonoBehaviour
     public void TakeDamage(int damage)
     {
         health -= damage;
+
         if (health <= 0)
-        {
             Destroy(gameObject);
-        }
     }
 
     private bool IsOutOfBounds()
@@ -66,17 +65,17 @@ public class Enemy : MonoBehaviour
     private void ResolvedPosition()
     {
         if (transform.position.x > mapLimit.x)
-            transform.position = new Vector3(-mapLimit.x, transform.position.y, transform.position.z);
-        else if (transform.position.x < -mapLimit.x)
             transform.position = new Vector3(mapLimit.x, transform.position.y, transform.position.z);
+        else if (transform.position.x < -mapLimit.x)
+            transform.position = new Vector3(-mapLimit.x, transform.position.y, transform.position.z);
         if (transform.position.y > mapLimit.y)
-            transform.position = new Vector3(transform.position.x, -mapLimit.y, transform.position.z);
-        else if (transform.position.y < -mapLimit.y)
             transform.position = new Vector3(transform.position.x, mapLimit.y, transform.position.z);
+        else if (transform.position.y < -mapLimit.y)
+            transform.position = new Vector3(transform.position.x, -mapLimit.y, transform.position.z);
         if (transform.position.z > mapLimit.z)
-            transform.position = new Vector3(transform.position.x, transform.position.y, -mapLimit.z);
-        else if (transform.position.z < -mapLimit.z)
             transform.position = new Vector3(transform.position.x, transform.position.y, mapLimit.z);
+        else if (transform.position.z < -mapLimit.z)
+            transform.position = new Vector3(transform.position.x, transform.position.y, -mapLimit.z);
     }
 
     private Vector3 RandomPosition()

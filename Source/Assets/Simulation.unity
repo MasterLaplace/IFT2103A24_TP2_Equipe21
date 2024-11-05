@@ -122,6 +122,26 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &261415525 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6653253499544507834, guid: 305efeaa570ec6d4fbdf45f05158981b, type: 3}
+  m_PrefabInstance: {fileID: 1762881593}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &261415529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 261415525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4857a3fda23e9464aa2839f179c0caca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyPrefab: {fileID: 5610437234142087959, guid: b82338bc2d1a16949ad28b64ffba3fa5, type: 3}
+  spawnTime: 3
+  maxEnemies: 10
 --- !u!1 &947183331
 GameObject:
   m_ObjectHideFlags: 0
@@ -250,6 +270,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 6735781956428764358, guid: a0b420d82bb644540adbec7fe94cc409, type: 3}
   velocity: 10
+  projectileVelocity: 20
   fov: 90
 --- !u!81 &1391975435
 AudioListener:
@@ -401,7 +422,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6653253499544507834, guid: 305efeaa570ec6d4fbdf45f05158981b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 261415529}
   m_SourcePrefab: {fileID: 100100000, guid: 305efeaa570ec6d4fbdf45f05158981b, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

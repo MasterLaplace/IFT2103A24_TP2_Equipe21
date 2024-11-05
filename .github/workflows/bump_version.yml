@@ -2,8 +2,7 @@ name: Bump version
 
 on:
   milestone:
-    types:
-      - closed
+    types: closed
 
 jobs:
   build:

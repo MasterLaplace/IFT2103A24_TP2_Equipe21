@@ -6,7 +6,7 @@ public class Enemy : MonoBehaviour
 {
     [SerializeField] private GameObject SkyBox;
     private Vector3 mapLimit;
-    [SerializeField] private float speed = 5f;
+    [SerializeField] private float speed = 20f;
     private Vector3 direction;
     private int health = 100;
     [SerializeField] private GameObject projectilePrefab;
@@ -19,8 +19,8 @@ public class Enemy : MonoBehaviour
         mapLimit = SkyBox.transform.localScale / 2;
 
         transform.position = RandomPosition();
+        ChooseRandomDirection();
 
-        Debug.Log("Enemy spawned at " + transform.position);
         lastShotTime = Time.time;
     }
 
@@ -44,7 +44,7 @@ public class Enemy : MonoBehaviour
             }
         }
         else
-            transform.Translate(speed * Time.deltaTime * direction);
+            transform.position += speed * Time.deltaTime * direction;
     }
 
     public void TakeDamage(int damage)
@@ -52,7 +52,6 @@ public class Enemy : MonoBehaviour
         health -= damage;
         if (health <= 0)
         {
-            Debug.Log("Enemy destroyed at " + transform.position);
             Destroy(gameObject);
         }
     }

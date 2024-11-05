@@ -16,17 +16,10 @@ public class DestroyProjectile : MonoBehaviour
     void Update()
     {
         if (IsOutOfBounds())
-        {
-            Debug.Log("Projectile destroyed at " + transform.position);
             Destroy(gameObject);
-        }
 
         if (TouchingEnemy())
-        {
-            Debug.Log("Projectile destroyed at " + transform.position);
-
             Destroy(gameObject);
-        }
     }
 
     private bool IsOutOfBounds()

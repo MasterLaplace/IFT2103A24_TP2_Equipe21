@@ -69,7 +69,6 @@ public class Player : MonoBehaviour
 
             Rigidbody rb = projectile.GetComponent<Rigidbody>();
             rb.velocity = Camera.main.transform.forward * projectileVelocity;
-            Debug.Log("Projectile launched at " + rb.velocity + " m/s");
         }
 
         transform.position = Camera.main.transform.position;

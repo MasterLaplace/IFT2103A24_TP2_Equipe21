@@ -2,12 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InteractiveObject : MonoBehaviour
+public class Player : MonoBehaviour
 {
     public GameObject projectilePrefab;
     [SerializeField] private float velocity = 10;
     [SerializeField] private float projectileVelocity = 40;
     [SerializeField] private float fov = 90;
+    [SerializeField] private int health = 100;
 
     void Start()
     {
@@ -15,6 +16,14 @@ public class InteractiveObject : MonoBehaviour
             throw new System.ArgumentException("Field of view must be between 1 and 179 degrees");
 
         Camera.main.fieldOfView = fov;
+
+        Camera cameraPlayer2 = Instantiate(Camera.main);
+        cameraPlayer2.GetComponent<AudioListener>().enabled = false;
+
+        Camera.main.rect = new Rect(0, 0.5f, 1, 0.5f);
+        cameraPlayer2.rect = new Rect(0, 0, 1, 0.5f);
+
+        transform.position = Camera.main.transform.position;
     }
 
     void Update()
@@ -56,11 +65,23 @@ public class InteractiveObject : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Joystick1Button5))
         {
-            GameObject projectile = Instantiate(projectilePrefab, Camera.main.transform.position, Camera.main.transform.rotation);
+            GameObject projectile = Instantiate(projectilePrefab, Camera.main.transform.position + (2 * Camera.main.transform.forward), Camera.main.transform.rotation);
 
             Rigidbody rb = projectile.GetComponent<Rigidbody>();
             rb.velocity = Camera.main.transform.forward * projectileVelocity;
             Debug.Log("Projectile launched at " + rb.velocity + " m/s");
+        }
+
+        transform.position = Camera.main.transform.position;
+    }
+
+    public void TakeDamage(int damage)
+    {
+        health -= damage;
+        if (health <= 0)
+        {
+            Debug.Log("Player died");
+            Destroy(gameObject);
         }
     }
 

@@ -120,3 +120,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SkyBox: {fileID: 6653253499544507834, guid: 305efeaa570ec6d4fbdf45f05158981b, type: 3}
   speed: 5
+  projectilePrefab: {fileID: 6735781956428764358, guid: a0b420d82bb644540adbec7fe94cc409, type: 3}
+  projectileVelocity: 40
+  cooldown: 2

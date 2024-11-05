@@ -9,6 +9,10 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float speed = 5f;
     private Vector3 direction;
     private int health = 100;
+    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private float projectileVelocity = 40;
+    [SerializeField] private float cooldown = 2f;
+    private float lastShotTime;
 
     void Start()
     {
@@ -17,6 +21,7 @@ public class Enemy : MonoBehaviour
         transform.position = RandomPosition();
 
         Debug.Log("Enemy spawned at " + transform.position);
+        lastShotTime = Time.time;
     }
 
     void Update()
@@ -29,7 +34,15 @@ public class Enemy : MonoBehaviour
         if (IsObjectNear())
             ChooseRandomDirection();
         else if (IsPlayerNear())
+        {
             transform.position = Vector3.MoveTowards(transform.position, Camera.main.transform.position, speed * Time.deltaTime);
+            if (Time.time - lastShotTime >= cooldown)
+            {
+                GameObject projectile = Instantiate(projectilePrefab, transform.position + (2 * transform.forward), Quaternion.identity);
+                projectile.GetComponent<Rigidbody>().velocity = (Camera.main.transform.position - transform.position).normalized * projectileVelocity;
+                lastShotTime = Time.time;
+            }
+        }
         else
             transform.Translate(speed * Time.deltaTime * direction);
     }

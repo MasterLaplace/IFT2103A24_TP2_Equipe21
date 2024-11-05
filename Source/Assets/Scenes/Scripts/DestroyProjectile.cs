@@ -44,14 +44,24 @@ public class DestroyProjectile : MonoBehaviour
 
     private bool TouchingEnemy()
     {
-        foreach (GameObject enemy in GameObject.FindGameObjectsWithTag("Enemy"))
+        foreach (GameObject target in GameObject.FindGameObjectsWithTag("Enemy"))
         {
-            if (enemy.GetComponent<Collider>().bounds.Intersects(GetComponent<Collider>().bounds))
+            if (target.GetComponent<Collider>().bounds.Intersects(GetComponent<Collider>().bounds))
             {
-                enemy.GetComponent<Enemy>().TakeDamage(damage);
-                return true;
+            target.GetComponent<Enemy>().TakeDamage(damage);
+            return true;
             }
         }
+
+        foreach (GameObject target in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            if (target.GetComponent<Collider>().bounds.Intersects(GetComponent<Collider>().bounds))
+            {
+            target.GetComponent<Player>().TakeDamage(damage);
+            return true;
+            }
+        }
+
         return false;
     }
 }

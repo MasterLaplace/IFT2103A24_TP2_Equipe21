@@ -46,14 +46,17 @@ public class Player : MonoBehaviour
             Debug.LogError("NetworkClient is not initialized or not enabled.");
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (networkClient != null && networkClient.Enable)
         {
             Net_HandleMovement(networkClient);
             Net_HandleShooting(networkClient);
         }
+        }
 
+    void Update()
+    {
         HandleMovement();
         HandleShooting();
         SyncPositionWithCamera();

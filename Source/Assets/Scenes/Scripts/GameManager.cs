@@ -1,14 +1,31 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public GameObject playerPrefab;
-    public int playerCount = 5;
-    public int rows = 2;
+    [SerializeField] private GameObject playerPrefab;
+    [SerializeField] private GameObject enemyPrefab;
+    [SerializeField] private float spawnTime = 3f;
+    [SerializeField] private int maxEnemies = 10;
+    [SerializeField] public int playerCount = 5;
+    [SerializeField] public int rows = 2;
+    [SerializeField] private bool networkMode = false;
+    [SerializeField] private string serverIP = "127.0.0.1";
+    [SerializeField] private int serverPort = 54000;
+    [SerializeField] private string gameName = "SpaceWar";
 
-    void Start()
+    public void Start()
     {
-        SpawnPlayers();
+        if (networkMode)
+        {
+            NetworkClient networkClient = gameObject.AddComponent<NetworkClient>();
+            networkClient.Create(serverIP, serverPort, gameName);
+        }
+        else
+        {
+            SpawnPlayers();
+            StartSpawner();
+        }
     }
 
     private Rect CalculateViewportRect(int playerIndex, int totalPlayers, int rows)
@@ -29,5 +46,10 @@ public class GameManager : MonoBehaviour
             Player playerScript = player.GetComponent<Player>();
             playerScript.SetupCameraViewport(CalculateViewportRect(i, playerCount, rows));
         }
+    }
+
+    private void StartSpawner()
+    {
+        gameObject.AddComponent<Spawner>().Create(enemyPrefab, spawnTime, maxEnemies);
     }
 }

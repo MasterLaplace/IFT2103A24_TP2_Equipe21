@@ -15,7 +15,7 @@ public class Player : Flakkari4Unity.ECS.Entity
     private float lastShotTime;
     [HideInInspector] public Camera playerCamera;
     [HideInInspector] private NetworkClient networkClient = null;
-    private bool isNetworkClientEnabled = false;
+    private bool isLocalPlayer = true;
     [SerializeField] private GameObject skyBoxPrefab;
     private Vector3 mapLimit;
     private readonly Dictionary<CurrentProtocol.EventId, CurrentProtocol.EventState> axisEvents = new(4);
@@ -47,12 +47,12 @@ public class Player : Flakkari4Unity.ECS.Entity
     public void SetupNetworkClient(NetworkClient networkClient)
     {
         this.networkClient = networkClient;
-        isNetworkClientEnabled = true;
+        isLocalPlayer = false;
     }
 
     public void FixedUpdate()
     {
-        if (isNetworkClientEnabled == false)
+        if (isLocalPlayer == true)
             return;
 
         List<CurrentProtocol.Event> events = new(8);

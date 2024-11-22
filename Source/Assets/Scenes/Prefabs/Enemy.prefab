@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8848871543570245283}
   - component: {fileID: 8365653285370957876}
   - component: {fileID: -5004706012767760290}
+  - component: {fileID: 1514360188638248278}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Enemy
@@ -123,3 +124,30 @@ MonoBehaviour:
   projectilePrefab: {fileID: 6735781956428764358, guid: a0b420d82bb644540adbec7fe94cc409, type: 3}
   projectileVelocity: 40
   cooldown: 2
+--- !u!114 &1514360188638248278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5610437234142087959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d512be06e8e59654aa43f84a1f706ae3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Id: 0
+  Position: {x: 0, y: 0, z: 0}
+  Rotation: {x: 0, y: 0, z: 0, w: 0}
+  Scale: {x: 0, y: 0, z: 0}
+  PrefabName: 
+  IsLocal: 0
+  IsStatic: 0
+  IsVisible: 0
+  IsEnabled: 0
+  IsDestroyed: 0
+  IsDirty: 0
+  IsNew: 0
+  IsUpdated: 0
+  IsDeleted: 0
+  IsSpawned: 0

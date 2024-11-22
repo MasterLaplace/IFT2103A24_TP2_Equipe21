@@ -4,14 +4,14 @@ public class DestroyProjectile : MonoBehaviour
 {
     [SerializeField] private GameObject SkyBox;
     private Vector3 mapLimit;
-    [SerializeField] private int damage = 50;
+    [SerializeField] public int damage { get; set; } = 50;
 
-    void Start()
+    public void Start()
     {
         mapLimit = SkyBox.transform.localScale / 2;
     }
 
-    void Update()
+    public void Update()
     {
         if (IsOutOfBounds())
             Destroy(gameObject);
@@ -27,20 +27,14 @@ public class DestroyProjectile : MonoBehaviour
                transform.position.z > mapLimit.z || transform.position.z < -mapLimit.z;
     }
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(Vector3.zero, SkyBox.transform.localScale);
-    }
-
     private bool TouchingEnemy()
     {
         foreach (GameObject target in GameObject.FindGameObjectsWithTag("Enemy"))
         {
             if (target.GetComponent<Collider>().bounds.Intersects(GetComponent<Collider>().bounds))
             {
-            target.GetComponent<Enemy>().TakeDamage(damage);
-            return true;
+                target.GetComponent<Enemy>().TakeDamage(damage);
+                return true;
             }
         }
 
@@ -48,8 +42,8 @@ public class DestroyProjectile : MonoBehaviour
         {
             if (target.GetComponent<Collider>().bounds.Intersects(GetComponent<Collider>().bounds))
             {
-            target.GetComponent<Player>().TakeDamage(damage);
-            return true;
+                target.GetComponent<Player>().TakeDamage(damage);
+                return true;
             }
         }
 

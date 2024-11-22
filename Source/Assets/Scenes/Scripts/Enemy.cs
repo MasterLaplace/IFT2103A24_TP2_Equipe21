@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Enemy : Flakkari4Unity.ECS.Entity
 {
     [SerializeField] private GameObject SkyBox;
     private Vector3 mapLimit;

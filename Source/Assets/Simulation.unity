@@ -224,6 +224,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -7034324477122950279, guid: 305efeaa570ec6d4fbdf45f05158981b, type: 3}
+      propertyPath: gameName
+      value: SpaceWar
+      objectReference: {fileID: 0}
     - target: {fileID: 1391483359346722765, guid: 305efeaa570ec6d4fbdf45f05158981b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -266,7 +270,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2017860202048211394, guid: 305efeaa570ec6d4fbdf45f05158981b, type: 3}
       propertyPath: playerCount
-      value: 4
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6653253499544507834, guid: 305efeaa570ec6d4fbdf45f05158981b, type: 3}
       propertyPath: m_Name

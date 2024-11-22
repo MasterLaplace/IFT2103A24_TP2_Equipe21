@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4921704859107160328}
   - component: {fileID: 6309568092706989840}
   - component: {fileID: 2017860202048211394}
+  - component: {fileID: 5816347255148828882}
   m_Layer: 0
   m_Name: SkyBox
   m_TagString: Untagged
@@ -100,9 +101,21 @@ MonoBehaviour:
   enemyPrefab: {fileID: 5610437234142087959, guid: b82338bc2d1a16949ad28b64ffba3fa5, type: 3}
   spawnTime: 3
   maxEnemies: 10
-  playerCount: 1
+  playerCount: 4
   rows: 1
-  networkMode: 1
-  serverIP: 172.31.1.246
+  networkMode: 0
+  serverIP: 127.0.0.1
   serverPort: 54000
   gameName: SpaceWar
+--- !u!114 &5816347255148828882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6653253499544507834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88d5623135b0e8647a52679e98703db0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

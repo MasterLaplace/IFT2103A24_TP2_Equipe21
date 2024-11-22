@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
-using UnityEngine;
 
 /// <summary>
 /// The Protocol namespace contains classes and enumerations for handling
@@ -18,6 +16,7 @@ namespace Flakkari4Unity.Protocol
         /// <summary>
         /// Version 0.
         /// </summary>
+        [Obsolete("Version 0 is deprecated.")]
         V_0 = 0,
         /// <summary>
         /// Version 1.
@@ -31,7 +30,6 @@ namespace Flakkari4Unity.Protocol
 
     namespace V1
     {
-
         /// <summary>
         /// Represents the priority of a command.
         /// </summary>
@@ -81,29 +79,13 @@ namespace Flakkari4Unity.Protocol
             /// </summary>
             REP_DISCONNECT = 3,
             /// <summary>
-            /// System command: Request to ping the server.
-            /// </summary>
-            REQ_PING = 4,
-            /// <summary>
-            /// System command: Response to ping request.
-            /// </summary>
-            REP_PING = 5,
-            /// <summary>
-            /// System command: Request to pong the server.
-            /// </summary>
-            REQ_PONG = 6,
-            /// <summary>
-            /// System command: Response to pong request.
-            /// </summary>
-            REP_PONG = 7,
-            /// <summary>
             /// System command: Request to send a heartbeat to the server.
             /// </summary>
-            REQ_HEARTBEAT = 8,
+            REQ_HEARTBEAT = 4,
             /// <summary>
             /// System command: Response to heartbeat request.
             /// </summary>
-            REP_HEARTBEAT = 9,
+            REP_HEARTBEAT = 5,
 
             /// <summary>
             /// Network command: Request to login.
@@ -238,24 +220,34 @@ namespace Flakkari4Unity.Protocol
         enum ComponentId : byte
         {
             // 2D components
+            [Obsolete("Component CONTROL is deprecated.")]
             CONTROL = 0,
+            [Obsolete("Component MOVABLE is deprecated.")]
             MOVABLE = 1,
+            [Obsolete("Component TRANSFORM is deprecated.")]
             TRANSFORM = 2,
+            [Obsolete("Component COLLIDER is deprecated.")]
             COLLIDER = 3,
+            [Obsolete("Component RIGIDBODY is deprecated.")]
             RIGIDBODY = 4,
+            // 10 - 19: 3D components
+            CONTROL_3D = 10,
+            MOVABLE_3D = 11,
+            TRANSFORM_3D = 12,
+            BOXCOLLIDER = 13,
+            SPHERECOLLIDER = 14,
+            RIGIDBODY_3D = 15,
             // Common components
-            CHILD = 10,
-            PARENT = 11,
-            TAG = 12,
-            SPAWNED = 13,
-            TEMPLATE = 14,
-            WEAPON = 15,
-            LEVEL = 16,
-            EVOLVE = 17,
-            HEALTH = 18,
-            // Network components
-            NETWORK_EVENT = 20,
-            NETWORK_IP = 21,
+            CHILD = 20,
+            EVOLVE = 21,
+            HEALTH = 22,
+            ID = 23,
+            LEVEL = 24,
+            PARENT = 25,
+            TAG = 26,
+            TEMPLATE = 27,
+            TIMER = 28,
+            WEAPON = 29,
             MAX_COMPONENT
         }
 
@@ -283,9 +275,8 @@ namespace Flakkari4Unity.Protocol
         /// </summary>
         public enum EventState : byte
         {
-            NONE = 0,
-            PRESSED = 1,
-            RELEASED = 2,
+            PRESSED = 0,
+            RELEASED = 1,
             MAX_STATE
         }
 
@@ -352,18 +343,44 @@ namespace Flakkari4Unity.Protocol
                 }
                 return eventBytes;
             }
+
+            public static byte[] Serialize(Dictionary<EventId, float> axisEvents)
+            {
+                byte[] eventBytes = new byte[axisEvents.Count * (sizeof(byte) + sizeof(float))];
+
+                int i = 0;
+                foreach (KeyValuePair<EventId, float> axisEvent in axisEvents)
+                {
+                    eventBytes[i * (sizeof(byte) + sizeof(float))] = (byte)axisEvent.Key;
+                    BitConverter.GetBytes(axisEvent.Value).CopyTo(eventBytes, i * (sizeof(byte) + sizeof(float)) + sizeof(byte));
+                    i++;
+                }
+                return eventBytes;
+            }
         }
 
         /// <summary>
         /// Represents the header of a packet.
         /// </summary>
+        /// <remarks>
+        /// Flakkari Header v1 (new header)
+        ///
+        ///  0                   1                   2                   3
+        ///  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+        /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        /// |Priority| Api V.|   CommandId   |       ContentLength          |
+        /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        /// |                        SequenceNumber                         |
+        /// |                                                               |
+        /// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        /// </remarks>
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct Header
         {
             public byte priorityAndVersion;  // 4 bits for priority, 4 bits for API version
             public CommandId commandId;
             public ushort contentLength;
-            public uint sequenceNumber;
+            public ulong sequenceNumber;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="Header"/> struct.
@@ -377,7 +394,7 @@ namespace Flakkari4Unity.Protocol
                 priorityAndVersion = (byte)(((int)apiVersion << 4) | ((int)priority & 0x0F));
                 this.commandId = commandId;
                 this.contentLength = contentLength;
-                sequenceNumber = (uint)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                sequenceNumber = (ulong)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             }
 
             /// <summary>
@@ -389,7 +406,7 @@ namespace Flakkari4Unity.Protocol
                 priorityAndVersion = packet[0];
                 commandId = (CommandId)packet[1];
                 contentLength = BitConverter.ToUInt16(packet, 2);
-                sequenceNumber = BitConverter.ToUInt32(packet, 4);
+                sequenceNumber = BitConverter.ToUInt64(packet, 4);
             }
 
             /// <summary>
@@ -440,7 +457,7 @@ namespace Flakkari4Unity.Protocol
             /// <param name="commandId">The command ID.</param>
             /// <param name="sequenceNumber">The sequence number.</param>
             /// <param name="payload">The payload of the packet.</param>
-            public static void Deserialize(byte[] packet, out CommandId commandId, out uint sequenceNumber, out byte[] payload)
+            public static void Deserialize(byte[] packet, out CommandId commandId, out ulong sequenceNumber, out byte[] payload)
             {
                 if (packet.Length < Marshal.SizeOf<Header>())
                     throw new ArgumentException("Packet is too short to contain a header.");

@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Collections.Generic;
 using UnityEngine;
 
 using Flk_API = Flakkari4Unity.API;
@@ -10,19 +11,23 @@ public class NetworkClient : MonoBehaviour
 {
     private UdpClient udpClient;
     private IPEndPoint serverEndpoint;
-    private readonly float keepAliveInterval = 4;
-    [SerializeField] private string serverIP = "127.0.0.1";
-    [SerializeField] private int serverPort = 54000;
-    [SerializeField] private string gameName = "R-Type";
-    [SerializeField] private bool enable;
+    private readonly float keepAliveInterval = 3;
+    private string serverIP;
+    private int serverPort;
+    private string gameName;
+    private bool enable = false;
 
-    void Start()
+    public bool Enable
     {
-        if (!enable)
-        {
-            Destroy(this);
-            return;
-        }
+        get => enable;
+    }
+
+    public void Create(string serverIP, int serverPort, string gameName)
+    {
+        this.serverIP = serverIP;
+        this.serverPort = serverPort;
+        this.gameName = gameName;
+        enable = true;
 
         udpClient = new UdpClient();
         serverEndpoint = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
@@ -34,18 +39,16 @@ public class NetworkClient : MonoBehaviour
         InvokeRepeating(nameof(ReqKeepAlive), keepAliveInterval, keepAliveInterval);
     }
 
-    public bool Enable
-    {
-        get => enable;
-        set => enable = value;
-    }
-
     internal void Send(byte[] packet)
     {
         if (udpClient != null)
+        {
             udpClient.Send(packet, packet.Length, serverEndpoint);
+        }
         else
+        {
             Debug.LogError("UDP client is not initialized.");
+        }
     }
 
     private void ReqKeepAlive()
@@ -62,7 +65,52 @@ public class NetworkClient : MonoBehaviour
         try
         {
             byte[] receivedData = udpClient.EndReceive(result, ref serverEndpoint);
-            Flk_API.APIClient.Reply(receivedData, out CurrentProtocol.CommandId commandId, out uint sequenceNumber, out byte[] payload);
+            Flk_API.APIClient.Reply(receivedData, out List<CurrentProtocol.CommandId> commandId, out List<ulong> sequenceNumber, out List<byte[]> payload);
+
+            Flakkari4Unity.Synchronizer synchronizer = gameObject.GetComponent<Flakkari4Unity.Synchronizer>();
+
+            for (int i = 0; i < commandId.Count; i++)
+            {
+                switch (commandId[i])
+                {
+                    case CurrentProtocol.CommandId.REP_CONNECT:
+                        Debug.Log("REP_CONNECT message received from the server.");
+                        Flk_API.APIClient.ResConnect(payload[i], ref synchronizer, out ulong entityId);
+
+                        Player playerScript = synchronizer.GetEntity(entityId).GetComponent<Player>();
+                        playerScript.SetupCameraViewport(new Rect(0, 0, 1, 1));
+                        playerScript.SetupNetworkClient(this);
+                        break;
+
+                    case CurrentProtocol.CommandId.REQ_ENTITY_SPAWN:
+                        Debug.Log("REQ_ENTITY_SPAWN message received from the server.");
+
+                        Flk_API.APIClient.ReqEntitySpawn(payload[i], ref synchronizer);
+                        break;
+
+                    case CurrentProtocol.CommandId.REQ_ENTITY_UPDATE:
+                        Debug.Log("REQ_ENTITY_UPDATE message received from the server.");
+
+                        Flk_API.APIClient.ReqEntityUpdate(payload[i], ref synchronizer);
+                        break;
+
+                    case CurrentProtocol.CommandId.REQ_ENTITY_DESTROY:
+                        Debug.Log("REQ_ENTITY_DESTROY message received from the server.");
+
+                        Flk_API.APIClient.ReqEntityDestroy(payload[i], ref synchronizer);
+                        break;
+
+                    case CurrentProtocol.CommandId.REQ_ENTITY_MOVED:
+                        Debug.Log("REQ_ENTITY_MOVED message received from the server.");
+
+                        Flk_API.APIClient.ReqEntityMoved(payload[i], ref synchronizer);
+                        break;
+
+                    default:
+                        Debug.LogWarning("Unknown command ID received from the server.");
+                        break;
+                }
+            }
         }
         catch (Exception e)
         {

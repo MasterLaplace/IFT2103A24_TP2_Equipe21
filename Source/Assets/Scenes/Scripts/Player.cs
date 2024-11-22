@@ -4,17 +4,19 @@ using System.Collections.Generic;
 using Flk_API = Flakkari4Unity.API;
 using CurrentProtocol = Flakkari4Unity.Protocol.V1;
 
-public class Player : MonoBehaviour
+public class Player : Flakkari4Unity.ECS.Entity
 {
     public GameObject projectilePrefab;
     [SerializeField] private float velocity = 10;
     [SerializeField] private float projectileVelocity = 40;
     [SerializeField] private float fov = 90;
     [SerializeField] private int health = 100;
+    [SerializeField] private float cooldown = 0.5f;
+    private float lastShotTime;
     [HideInInspector] public Camera playerCamera;
-    [SerializeField] private GameObject SkyBox;
+    [HideInInspector] private NetworkClient networkClient = null;
+    [SerializeField] private GameObject skyBoxPrefab;
     private Vector3 mapLimit;
-    private NetworkClient networkClient;
     private readonly Dictionary<CurrentProtocol.EventId, CurrentProtocol.EventState> axisEvents = new(4);
 
     public void SetupCameraViewport(Rect viewport)
@@ -22,7 +24,7 @@ public class Player : MonoBehaviour
         if (fov < 1 || fov > 179)
             throw new System.ArgumentException("Field of view must be between 1 and 179 degrees");
 
-        mapLimit = SkyBox.transform.localScale / 2;
+        mapLimit = skyBoxPrefab.transform.localScale / 2;
 
         playerCamera = new GameObject("PlayerCamera").AddComponent<Camera>();
         playerCamera.rect = viewport;
@@ -38,34 +40,38 @@ public class Player : MonoBehaviour
             audioListener.enabled = true;
 
         foreach (CurrentProtocol.EventId eventId in System.Enum.GetValues(typeof(CurrentProtocol.EventId)))
-            axisEvents[eventId] = CurrentProtocol.EventState.NONE;
-
-        networkClient = FindObjectOfType<NetworkClient>();
-
-        if (networkClient == null || !networkClient.Enable)
-            Debug.LogError("NetworkClient is not initialized or not enabled.");
+            axisEvents[eventId] = CurrentProtocol.EventState.MAX_STATE;
     }
 
-    void FixedUpdate()
+    public void SetupNetworkClient(NetworkClient networkClient)
     {
-        if (networkClient != null && networkClient.Enable)
-        {
-            Net_HandleMovement(networkClient);
-            Net_HandleShooting(networkClient);
-        }
-        }
+        this.networkClient = networkClient;
+    }
 
-    void Update()
+    public void FixedUpdate()
+    {
+        if (networkClient == null && networkClient.Enable)
+            return;
+
+        List<CurrentProtocol.Event> events = new(8);
+        Dictionary<CurrentProtocol.EventId, float> axisValues = new(4);
+
+        Net_HandleMovement(networkClient, ref events, ref axisValues);
+        Net_HandleShooting(networkClient, ref events);
+
+        if (events.Count > 0 || axisValues.Count > 0)
+            networkClient.Send(Flk_API.APIClient.ReqUserUpdates(events, axisValues));
+    }
+
+    public void Update()
     {
         HandleMovement();
         HandleShooting();
         SyncPositionWithCamera();
     }
 
-    private void Net_HandleMovement(NetworkClient networkClient)
+    private void Net_HandleMovement(NetworkClient networkClient, ref List<CurrentProtocol.Event> events, ref Dictionary<CurrentProtocol.EventId, float> axisValues)
     {
-        List<CurrentProtocol.Event> events = new(8);
-
         HandleNetworkInput("Fire2", CurrentProtocol.EventId.MOVE_FRONT, ref events);
         HandleNetworkInput("Fire1", CurrentProtocol.EventId.MOVE_BACK, ref events);
         HandleNetworkInput(KeyCode.W, CurrentProtocol.EventId.MOVE_FRONT, ref events);
@@ -73,15 +79,14 @@ public class Player : MonoBehaviour
 
         if (Input.GetMouseButton(1))
         {
-            HandleMouseMovement("Mouse X", CurrentProtocol.EventId.LOOK_LEFT, CurrentProtocol.EventId.LOOK_RIGHT, ref events);
-            HandleMouseMovement("Mouse Y", CurrentProtocol.EventId.LOOK_DOWN, CurrentProtocol.EventId.LOOK_UP, ref events);
+            HandleMouseMovement("Mouse X", CurrentProtocol.EventId.LOOK_LEFT, CurrentProtocol.EventId.LOOK_RIGHT, ref axisValues);
+            HandleMouseMovement("Mouse Y", CurrentProtocol.EventId.LOOK_DOWN, CurrentProtocol.EventId.LOOK_UP, ref axisValues);
         }
         else
         {
-            HandleMouseMovement("Horizontal", CurrentProtocol.EventId.LOOK_LEFT, CurrentProtocol.EventId.LOOK_RIGHT, ref events);
-            HandleMouseMovement("Vertical", CurrentProtocol.EventId.LOOK_DOWN, CurrentProtocol.EventId.LOOK_UP, ref events);
+            HandleMouseMovement("Horizontal", CurrentProtocol.EventId.LOOK_LEFT, CurrentProtocol.EventId.LOOK_RIGHT, ref axisValues);
+            HandleMouseMovement("Vertical", CurrentProtocol.EventId.LOOK_DOWN, CurrentProtocol.EventId.LOOK_UP, ref axisValues);
         }
-
     }
 
     private void HandleNetworkInput(string inputName, CurrentProtocol.EventId eventId, ref List<CurrentProtocol.Event> events)
@@ -114,7 +119,22 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void HandleMouseMovement(string axisName, CurrentProtocol.EventId negativeEventId, CurrentProtocol.EventId positiveEventId, ref List<CurrentProtocol.Event> events)
+    private void HandleNetworkMouseInput(int keyCode, CurrentProtocol.EventId eventId, ref List<CurrentProtocol.Event> events)
+    {
+        if (Input.GetMouseButtonDown(keyCode))
+        {
+            events.Add(new CurrentProtocol.Event { id = eventId, state = CurrentProtocol.EventState.PRESSED });
+            Debug.Log("Input: " + keyCode + " EventId: " + eventId + " EventState: " + CurrentProtocol.EventState.PRESSED);
+        }
+
+        else if (Input.GetMouseButtonUp(keyCode))
+        {
+            events.Add(new CurrentProtocol.Event { id = eventId, state = CurrentProtocol.EventState.RELEASED });
+            Debug.Log("Input: " + keyCode + " EventId: " + eventId + " EventState: " + CurrentProtocol.EventState.RELEASED);
+        }
+    }
+
+    private void HandleMouseMovement(string axisName, CurrentProtocol.EventId negativeEventId, CurrentProtocol.EventId positiveEventId , ref Dictionary<CurrentProtocol.EventId, float> axisValues)
     {
         float axisValue = Input.GetAxis(axisName);
 
@@ -122,49 +142,51 @@ public class Player : MonoBehaviour
         {
             axisEvents[negativeEventId] = CurrentProtocol.EventState.PRESSED;
             axisEvents[positiveEventId] = CurrentProtocol.EventState.RELEASED;
-            events.Add(new CurrentProtocol.Event { id = negativeEventId, state = CurrentProtocol.EventState.PRESSED });
-            Debug.Log("Input: " + axisName + " EventId: " + negativeEventId + " EventState: " + CurrentProtocol.EventState.PRESSED);
+            axisValues[negativeEventId] = axisValue;
+            axisValues[positiveEventId] = 0;
+            Debug.Log("Input: " + axisName + " EventId: " + negativeEventId + " EventState: " + CurrentProtocol.EventState.PRESSED + " Value: " + axisValue);
         }
         else if (axisValue > 0 && axisEvents[positiveEventId] != CurrentProtocol.EventState.PRESSED)
         {
             axisEvents[positiveEventId] = CurrentProtocol.EventState.PRESSED;
             axisEvents[negativeEventId] = CurrentProtocol.EventState.RELEASED;
-            events.Add(new CurrentProtocol.Event { id = positiveEventId, state = CurrentProtocol.EventState.PRESSED });
-            Debug.Log("Input: " + axisName + " EventId: " + positiveEventId + " EventState: " + CurrentProtocol.EventState.PRESSED);
+            axisValues[positiveEventId] = axisValue;
+            axisValues[negativeEventId] = 0;
+            Debug.Log("Input: " + axisName + " EventId: " + positiveEventId + " EventState: " + CurrentProtocol.EventState.PRESSED + " Value: " + axisValue);
         }
 
         if (axisValue == 0 && axisEvents[negativeEventId] == CurrentProtocol.EventState.PRESSED)
         {
             axisEvents[negativeEventId] = CurrentProtocol.EventState.RELEASED;
-            events.Add(new CurrentProtocol.Event { id = negativeEventId, state = CurrentProtocol.EventState.RELEASED });
+            axisValues[negativeEventId] = 0;
             Debug.Log("Input: " + axisName + " EventId: " + negativeEventId + " EventState: " + CurrentProtocol.EventState.RELEASED);
         }
         if (axisValue == 0 && axisEvents[positiveEventId] == CurrentProtocol.EventState.PRESSED)
         {
             axisEvents[positiveEventId] = CurrentProtocol.EventState.RELEASED;
-            events.Add(new CurrentProtocol.Event { id = positiveEventId, state = CurrentProtocol.EventState.RELEASED });
+            axisValues[positiveEventId] = 0;
             Debug.Log("Input: " + axisName + " EventId: " + positiveEventId + " EventState: " + CurrentProtocol.EventState.RELEASED);
         }
     }
 
-    private void Net_HandleShooting(NetworkClient networkClient)
+    private void Net_HandleShooting(NetworkClient networkClient, ref List<CurrentProtocol.Event> events)
     {
-        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Joystick1Button5))
-        {
-            byte[] packet = Flk_API.APIClient.ReqUserUpdate(CurrentProtocol.EventId.SHOOT, CurrentProtocol.EventState.RELEASED);
-            networkClient.Send(packet);
-        }
+        if (Time.time - lastShotTime < cooldown)
+            return;
+
+        HandleNetworkMouseInput(0, CurrentProtocol.EventId.SHOOT, ref events);
+        HandleNetworkInput(KeyCode.Joystick1Button5, CurrentProtocol.EventId.SHOOT, ref events);
     }
 
     private void HandleMovement()
     {
-        if (Input.GetButton("Fire2"))
+        if (Input.GetButton("Fire2")) // move forward
         {
             Vector3 direction = playerCamera.transform.forward * velocity;
             playerCamera.transform.position += direction * Time.deltaTime;
         }
 
-        if (Input.GetButton("Fire1"))
+        if (Input.GetButton("Fire1")) // move back
         {
             Vector3 direction = playerCamera.transform.forward * velocity;
             playerCamera.transform.position += -direction * Time.deltaTime;
@@ -194,12 +216,19 @@ public class Player : MonoBehaviour
 
     private void HandleShooting()
     {
-        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Joystick1Button5))
+        if (Time.time - lastShotTime < cooldown)
+            return;
+
+        if (Input.GetMouseButtonUp(0) || Input.GetKeyUp(KeyCode.Joystick1Button5))
         {
+            lastShotTime = Time.time;
+
             GameObject projectile = Instantiate(projectilePrefab, playerCamera.transform.position + (2 * playerCamera.transform.forward), playerCamera.transform.rotation);
 
             Rigidbody rb = projectile.GetComponent<Rigidbody>();
             rb.velocity = playerCamera.transform.forward * projectileVelocity;
+
+            DestroyProjectile ds_script = projectile.GetComponent<DestroyProjectile>();
         }
     }
 
@@ -225,11 +254,5 @@ public class Player : MonoBehaviour
         float z = Random.Range(-mapLimit.z, mapLimit.z);
 
         return new Vector3(x, y, z);
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(Camera.main.transform.position, Camera.main.transform.position + Camera.main.transform.forward * 20);
     }
 }

@@ -218,7 +218,7 @@ GameObject:
   - component: {fileID: 8659342669767446333}
   - component: {fileID: 5183239117198874464}
   - component: {fileID: 5182271961268386243}
-  - component: {fileID: -4975504833722958698}
+  - component: {fileID: 3845038680356405712}
   m_Layer: 5
   m_Name: BindingPlayerCase
   m_TagString: Untagged
@@ -288,7 +288,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &-4975504833722958698
+--- !u!114 &3845038680356405712
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -297,11 +297,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1362302922479264810}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 21053cb48570b0f41a0d9a4820d92a4b, type: 3}
+  m_Script: {fileID: 11500000, guid: 3c1371a658dad3a4396111abddeb049b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BindingPlayerCase: {fileID: 5610437234142087959, guid: f94302f60f1720540959f628b12eba3c, type: 3}
-  slotsParent: {fileID: 0}
+  inputForward: {fileID: 0}
+  inputLeft: {fileID: 0}
+  inputRight: {fileID: 0}
+  inputShoot: {fileID: 0}
 --- !u!1 &1765354693049429108
 GameObject:
   m_ObjectHideFlags: 0
@@ -2144,7 +2146,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8385814387984025877}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

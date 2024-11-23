@@ -68,6 +68,10 @@ public class NetworkClient : MonoBehaviour
         udpClient.Send(packet, packet.Length, serverEndpoint);
     }
 
+    /// <summary>
+    /// Handles the reception of data from the server asynchronously.
+    /// </summary>
+    /// <param name="result">The result of the asynchronous operation.</param>
     private void OnReceive(IAsyncResult result)
     {
         if (!enable)

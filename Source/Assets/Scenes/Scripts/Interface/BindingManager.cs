@@ -8,6 +8,7 @@ public class BindingManager : MonoBehaviour
     void Start()
     {
         int players = InterfaceManager.Instance.numberOfPlayers; // Récupère le nombre de joueurs
+        Debug.Log("players : " + players);
         for (int i = 0; i < players; i++)
         {
             // Instancie un slot pour chaque joueur

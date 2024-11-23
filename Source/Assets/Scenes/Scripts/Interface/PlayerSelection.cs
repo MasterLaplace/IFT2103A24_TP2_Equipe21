@@ -5,7 +5,10 @@ public class PlayerSelection : MonoBehaviour
 {
     public void SelectPlayers(int players)
     {
-        InterfaceManager.Instance.numberOfPlayers = players; // Enregistre le choix
-        SceneManager.LoadScene("BindingScene"); // Charge la scène suivante
+        Debug.Log("SelectPlayers");
+        InterfaceManager.Instance.numberOfPlayers = players;
+        Debug.Log("players : " + players);
+        Debug.Log("InterfaceManager.Instance.numberOfPlayers : " + InterfaceManager.Instance.numberOfPlayers);
+        SceneManager.LoadScene("BindingScene");
     }
 }

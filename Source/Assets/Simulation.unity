@@ -1011,6 +1011,14 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2017860202048211394, guid: 305efeaa570ec6d4fbdf45f05158981b, type: 3}
+      propertyPath: serverIP
+      value: 127.0.0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2017860202048211394, guid: 305efeaa570ec6d4fbdf45f05158981b, type: 3}
+      propertyPath: networkMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2017860202048211394, guid: 305efeaa570ec6d4fbdf45f05158981b, type: 3}
       propertyPath: playerCount
       value: 1
       objectReference: {fileID: 0}

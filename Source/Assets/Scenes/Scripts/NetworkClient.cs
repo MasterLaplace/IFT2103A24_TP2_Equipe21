@@ -32,11 +32,11 @@ public class NetworkClient : MonoBehaviour
         udpClient = new UdpClient();
         serverEndpoint = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
 
-        udpClient.BeginReceive(OnReceive, null);
+        // udpClient.BeginReceive(OnReceive, null);
 
         byte[] packet = Flk_API.APIClient.ReqConnect(gameName);
         udpClient.Send(packet, packet.Length, serverEndpoint);
-        InvokeRepeating(nameof(ReqKeepAlive), keepAliveInterval, keepAliveInterval);
+        // InvokeRepeating(nameof(ReqKeepAlive), keepAliveInterval, keepAliveInterval);
     }
 
     internal void Send(byte[] packet)
@@ -57,67 +57,67 @@ public class NetworkClient : MonoBehaviour
         udpClient.Send(packet, packet.Length, serverEndpoint);
     }
 
-    private void OnReceive(IAsyncResult result)
-    {
-        if (!enable)
-            return;
+    // private void OnReceive(IAsyncResult result)
+    // {
+    //     if (!enable)
+    //         return;
 
-        try
-        {
-            byte[] receivedData = udpClient.EndReceive(result, ref serverEndpoint);
-            Flk_API.APIClient.Reply(receivedData, out List<CurrentProtocol.CommandId> commandId, out List<ulong> sequenceNumber, out List<byte[]> payload);
+    //     try
+    //     {
+    //         byte[] receivedData = udpClient.EndReceive(result, ref serverEndpoint);
+    //         Flk_API.APIClient.Reply(receivedData, out List<CurrentProtocol.CommandId> commandId, out List<ulong> sequenceNumber, out List<byte[]> payload);
 
-            Flakkari4Unity.Synchronizer synchronizer = gameObject.GetComponent<Flakkari4Unity.Synchronizer>();
+    //         Flakkari4Unity.Synchronizer synchronizer = gameObject.GetComponent<Flakkari4Unity.Synchronizer>();
 
-            for (int i = 0; i < commandId.Count; i++)
-            {
-                switch (commandId[i])
-                {
-                    case CurrentProtocol.CommandId.REP_CONNECT:
-                        Debug.Log("REP_CONNECT message received from the server.");
-                        Flk_API.APIClient.ResConnect(payload[i], ref synchronizer, out ulong entityId);
+    //         for (int i = 0; i < commandId.Count; i++)
+    //         {
+    //             switch (commandId[i])
+    //             {
+    //                 case CurrentProtocol.CommandId.REP_CONNECT:
+    //                     Debug.Log("REP_CONNECT message received from the server.");
+    //                     Flk_API.APIClient.ResConnect(payload[i], ref synchronizer, out ulong entityId);
 
-                        Player playerScript = synchronizer.GetEntity(entityId).GetComponent<Player>();
-                        playerScript.SetupCameraViewport(new Rect(0, 0, 1, 1));
-                        playerScript.SetupNetworkClient(this);
-                        break;
+    //                     Player playerScript = synchronizer.GetEntity(entityId).GetComponent<Player>();
+    //                     playerScript.SetupCameraViewport(new Rect(0, 0, 1, 1));
+    //                     playerScript.SetupNetworkClient(this);
+    //                     break;
 
-                    case CurrentProtocol.CommandId.REQ_ENTITY_SPAWN:
-                        Debug.Log("REQ_ENTITY_SPAWN message received from the server.");
+    //                 case CurrentProtocol.CommandId.REQ_ENTITY_SPAWN:
+    //                     Debug.Log("REQ_ENTITY_SPAWN message received from the server.");
 
-                        Flk_API.APIClient.ReqEntitySpawn(payload[i], ref synchronizer);
-                        break;
+    //                     Flk_API.APIClient.ReqEntitySpawn(payload[i], ref synchronizer);
+    //                     break;
 
-                    case CurrentProtocol.CommandId.REQ_ENTITY_UPDATE:
-                        Debug.Log("REQ_ENTITY_UPDATE message received from the server.");
+    //                 case CurrentProtocol.CommandId.REQ_ENTITY_UPDATE:
+    //                     Debug.Log("REQ_ENTITY_UPDATE message received from the server.");
 
-                        Flk_API.APIClient.ReqEntityUpdate(payload[i], ref synchronizer);
-                        break;
+    //                     Flk_API.APIClient.ReqEntityUpdate(payload[i], ref synchronizer);
+    //                     break;
 
-                    case CurrentProtocol.CommandId.REQ_ENTITY_DESTROY:
-                        Debug.Log("REQ_ENTITY_DESTROY message received from the server.");
+    //                 case CurrentProtocol.CommandId.REQ_ENTITY_DESTROY:
+    //                     Debug.Log("REQ_ENTITY_DESTROY message received from the server.");
 
-                        Flk_API.APIClient.ReqEntityDestroy(payload[i], ref synchronizer);
-                        break;
+    //                     Flk_API.APIClient.ReqEntityDestroy(payload[i], ref synchronizer);
+    //                     break;
 
-                    case CurrentProtocol.CommandId.REQ_ENTITY_MOVED:
-                        Debug.Log("REQ_ENTITY_MOVED message received from the server.");
+    //                 case CurrentProtocol.CommandId.REQ_ENTITY_MOVED:
+    //                     Debug.Log("REQ_ENTITY_MOVED message received from the server.");
 
-                        Flk_API.APIClient.ReqEntityMoved(payload[i], ref synchronizer);
-                        break;
+    //                     Flk_API.APIClient.ReqEntityMoved(payload[i], ref synchronizer);
+    //                     break;
 
-                    default:
-                        Debug.LogWarning("Unknown command ID received from the server.");
-                        break;
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Error in OnReceive: " + e.Message);
-        }
-        udpClient.BeginReceive(OnReceive, null);
-    }
+    //                 default:
+    //                     Debug.LogWarning("Unknown command ID received from the server.");
+    //                     break;
+    //             }
+    //         }
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Debug.LogError("Error in OnReceive: " + e.Message);
+    //     }
+    //     udpClient.BeginReceive(OnReceive, null);
+    // }
 
     private void OnApplicationQuit()
     {

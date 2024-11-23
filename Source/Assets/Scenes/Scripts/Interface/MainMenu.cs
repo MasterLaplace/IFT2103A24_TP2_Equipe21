@@ -10,7 +10,7 @@ public class MainMenu : MonoBehaviour
     {
         //met un ecran noir pour le chargement a mettre ici.
         Instantiate(BlackScreenPrefab);
-        SceneManager.LoadScene("Simulation");
+        SceneManager.LoadScene("SelectModeScene");
         // delete the blackboard when the scene is loaded
         while (GameObject.Find("BlackScreen(Clone)") != null)
             Destroy(BlackScreenPrefab);
@@ -18,6 +18,26 @@ public class MainMenu : MonoBehaviour
     public void SettingButton()
     {
         SceneManager.LoadScene("SettingScene");
+    }
+
+    public void SoloButton()
+    {
+        SceneManager.LoadScene("SoloScene");
+    }
+
+    public void MainMenuButton()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+    public void StartSimulation()
+    {
+               //met un ecran noir pour le chargement a mettre ici.
+        Instantiate(BlackScreenPrefab);
+        SceneManager.LoadScene("Simulation");
+        // delete the blackboard when the scene is loaded
+        while (GameObject.Find("BlackScreen(Clone)") != null)
+            Destroy(BlackScreenPrefab);
+        // SceneManager.LoadScene("Simulation");
     }
     public void QuitGame()
     {

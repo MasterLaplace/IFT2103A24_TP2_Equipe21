@@ -154,21 +154,13 @@ namespace Flakkari4Unity.Protocol
             REP_ENTITY_SHOOT = 29,
 
             /// <summary>
-            /// User command: Request to update a user.
-            /// </summary>
-            REQ_USER_UPDATE = 30,
-            /// <summary>
-            /// User command: Response to user update request.
-            /// </summary>
-            REP_USER_UPDATE = 31,
-            /// <summary>
             /// User command: Request to update a user with a list of events.
             /// </summary>
-            REQ_USER_UPDATES = 32,
+            REQ_USER_UPDATES = 30,
             /// <summary>
             /// User command: Response to user update request with a list of events.
             /// </summary>
-            REP_USER_UPDATES = 33,
+            REP_USER_UPDATES = 31,
 
             /// <summary>
             /// Matchmaking command: Request to create a room.

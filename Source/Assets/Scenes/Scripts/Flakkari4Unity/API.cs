@@ -25,19 +25,16 @@ namespace Flakkari4Unity.API
             );
         }
 
-        public static void ResConnect(byte[] payload, ref Synchronizer synchronizer, out ulong entityId)
+        public static byte[] ResConnect(byte[] payload, out ulong entityId, out string templateName)
         {
             entityId = BitConverter.ToUInt64(payload, 0);
             int index = sizeof(ulong);
 
-            ulong length = BitConverter.ToUInt64(payload, index);
-            index += sizeof(ulong);
-            string templateName = System.Text.Encoding.UTF8.GetString(payload, index, (int)length);
+            uint length = BitConverter.ToUInt32(payload, index);
+            index += sizeof(uint);
+            templateName = System.Text.Encoding.UTF8.GetString(payload, index, (int)length);
             index += (int)length;
-
-            GameObject player = Instantiate(Resources.Load<GameObject>(templateName));
-            player.name = templateName + "_" + entityId;
-            synchronizer.AddEntity(entityId, player.GetComponent<ECS.Entity>(), payload.Skip(index).ToArray());
+            return payload.Skip(index).ToArray();
         }
 
         /// <summary>
@@ -56,19 +53,16 @@ namespace Flakkari4Unity.API
             );
         }
 
-        public static void ReqEntitySpawn(byte[] payload, ref Synchronizer synchronizer)
+        public static byte[] ReqEntitySpawn(byte[] payload, out ulong entityId, out string templateName)
         {
-            ulong entityId = BitConverter.ToUInt64(payload, 0);
+            entityId = BitConverter.ToUInt64(payload, 0);
             int index = sizeof(ulong);
 
-            ulong length = BitConverter.ToUInt64(payload, index);
-            index += sizeof(ulong);
-            string templateName = System.Text.Encoding.UTF8.GetString(payload, index, (int)length);
+            uint length = BitConverter.ToUInt32(payload, index);
+            index += sizeof(uint);
+            templateName = System.Text.Encoding.UTF8.GetString(payload, index, (int)length);
             index += (int)length;
-
-            GameObject entity = Instantiate(Resources.Load<GameObject>(templateName));
-            entity.name = templateName + "_" + entityId;
-            synchronizer.AddEntity(entityId, entity.GetComponent<ECS.Entity>(), payload.Skip(index).ToArray());
+            return payload.Skip(index).ToArray();
         }
 
         public static void ReqEntityUpdate(byte[] payload, ref Synchronizer synchronizer)
@@ -125,22 +119,6 @@ namespace Flakkari4Unity.API
                 CurrentProtocol.Priority.HIGH,
                 CurrentProtocol.CommandId.REQ_USER_UPDATES,
                 payload
-            );
-        }
-
-        public static byte[] ReqUserUpdate(CurrentProtocol.EventId id, CurrentProtocol.EventState state)
-        {
-            CurrentProtocol.Event _event = new()
-            {
-                id = id,
-                state = state
-            };
-
-            Debug.Log("REQ_USER_UPDATE message sent to the server.");
-            return CurrentProtocol.Packet.Serialize(
-                CurrentProtocol.Priority.HIGH,
-                CurrentProtocol.CommandId.REQ_USER_UPDATE,
-                CurrentProtocol.Event.Serialize(_event)
             );
         }
 

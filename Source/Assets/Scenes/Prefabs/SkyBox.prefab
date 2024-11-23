@@ -101,10 +101,10 @@ MonoBehaviour:
   enemyPrefab: {fileID: 5610437234142087959, guid: b82338bc2d1a16949ad28b64ffba3fa5, type: 3}
   spawnTime: 3
   maxEnemies: 10
-  playerCount: 4
+  playerCount: 1
   rows: 1
-  networkMode: 0
-  serverIP: 127.0.0.1
+  networkMode: 1
+  serverIP: 172.31.1.246
   serverPort: 54000
   gameName: SpaceWar
 --- !u!114 &5816347255148828882

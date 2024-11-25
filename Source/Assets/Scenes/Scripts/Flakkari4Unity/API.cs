@@ -25,6 +25,13 @@ namespace Flakkari4Unity.API
             );
         }
 
+        /// <summary>
+        /// Processes the RES_CONNECT message and extracts the entity ID and template name.
+        /// </summary>
+        /// <param name="payload">The byte array containing the payload of the RES_CONNECT message.</param>
+        /// <param name="entityId">The extracted entity ID from the payload.</param>
+        /// <param name="templateName">The extracted template name from the payload.</param>
+        /// <returns>The remaining payload after extracting the entity ID and template name.</returns>
         public static byte[] ResConnect(byte[] payload, out ulong entityId, out string templateName)
         {
             entityId = BitConverter.ToUInt64(payload, 0);
@@ -35,6 +42,18 @@ namespace Flakkari4Unity.API
             templateName = System.Text.Encoding.UTF8.GetString(payload, index, (int)length);
             index += (int)length;
             return payload.Skip(index).ToArray();
+        }
+
+        /// <summary>
+        /// Creates a REQ_DISCONNECT message to disconnect from the server.
+        /// </summary>
+        /// <returns>A byte array representing the serialized REQ_DISCONNECT message.</returns>
+        public static byte[] ReqDisconnect()
+        {
+            return CurrentProtocol.Packet.Serialize(
+                CurrentProtocol.Priority.HIGH,
+                CurrentProtocol.CommandId.REQ_DISCONNECT
+            );
         }
 
         /// <summary>
@@ -114,7 +133,6 @@ namespace Flakkari4Unity.API
             payload = ConcatByteArrays(payload, axisEventCountBytes);
             payload = ConcatByteArrays(payload, serializedAxisEvents);
 
-            Debug.Log("REQ_USER_UPDATES message sent to the server.");
             return CurrentProtocol.Packet.Serialize(
                 CurrentProtocol.Priority.HIGH,
                 CurrentProtocol.CommandId.REQ_USER_UPDATES,

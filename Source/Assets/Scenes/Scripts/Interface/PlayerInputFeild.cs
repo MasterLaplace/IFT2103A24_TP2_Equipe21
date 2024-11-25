@@ -1,53 +1,53 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro; // Nécessaire pour utiliser TMP_Dropdown
 
 public class PlayerInputFields : MonoBehaviour
 {
-    public InputField inputForward;
-    public InputField inputLeft;
-    public InputField inputRight;
-    public InputField inputShoot;
-    private void Start()
-    {
-    // Trouver tous les InputFields dans les enfants
-        InputField[] inputFields = GetComponentsInChildren<InputField>();
+    public TMP_Dropdown dropdownForward;
+    public TMP_Dropdown dropdownBack;
+    public TMP_Dropdown dropdownShoot;
 
-        foreach (InputField inputField in inputFields)
+    private void Awake()
+    {
+        // Trouver tous les TMP_Dropdowns dans les enfants
+        TMP_Dropdown[] dropdowns = GetComponentsInChildren<TMP_Dropdown>();
+
+        Debug.Log($"Nombre de TMP_Dropdowns trouvés : {dropdowns.Length}");
+
+        foreach (TMP_Dropdown dropdown in dropdowns)
         {
-            switch (inputField.name)
+            Debug.Log($"Nom du TMP_Dropdown : {dropdown.name}");
+            switch (dropdown.name)
             {
-                case "AvanceInputFeild":
-                    inputForward = inputField;
+                case "AvanceDropdown": // Correspond au nom dans la hiérarchie
+                    dropdownForward = dropdown;
                     break;
-                case "GaucheInputFeild":
-                    inputLeft = inputField;
+                case "TirerDropdown":
+                    dropdownShoot = dropdown;
                     break;
-                case "DroiteInputFeild":
-                    inputRight = inputField;
-                    break;
-                case "TirerInputFeild":
-                    inputShoot = inputField;
+                case "BackDropdown":
+                    dropdownBack = dropdown;
                     break;
             }
         }
 
         // Debug pour vérifier les assignations
-        Debug.Log($"Forward: {inputForward}, Left: {inputLeft}, Right: {inputRight}, Shoot: {inputShoot}");
+        Debug.Log($"Forward: {dropdownForward}, Shoot: {dropdownShoot}, Back: {dropdownBack}");
 
-        // Si l'un des champs est null, affiche une erreur
-        if (inputForward == null || inputLeft == null || inputRight == null || inputShoot == null)
+        // Vérification des assignations
+        if (dropdownForward == null || dropdownShoot == null || dropdownBack == null)
         {
-            Debug.LogError("Certains InputFields ne sont pas assignés !");
+            Debug.LogError("Certains TMP_Dropdowns ne sont pas assignés !");
         }
     }
+
     // Méthode pour récupérer les touches assignées
     public PlayerControls GetPlayerControls()
     {
         return new PlayerControls(
-            inputForward.text,
-            inputLeft.text,
-            inputRight.text,
-            inputShoot.text
+            dropdownForward.options[dropdownForward.value].text,
+            dropdownShoot.options[dropdownShoot.value].text,
+            dropdownBack.options[dropdownBack.value].text
         );
     }
 }
@@ -55,17 +55,28 @@ public class PlayerInputFields : MonoBehaviour
 // Classe pour représenter les contrôles d'un joueur
 public class PlayerControls
 {
-    public string forward;
-    public string left;
-    public string right;
-    public string shoot;
+    public KeyCode forward = KeyCode.W;
+    public KeyCode shoot = KeyCode.Space;
+    public KeyCode back = KeyCode.S;
 
-    public PlayerControls(string forward, string left, string right, string shoot)
+    public PlayerControls(string forward, string shoot, string back)
     {
-        this.forward = forward;
-        this.left = left;
-        this.right = right;
-        this.shoot = shoot;
+        this.forward = StringToKeyCode(this.forward, forward);
+        this.back = StringToKeyCode(this.back, back);
+        this.shoot = StringToKeyCode(this.shoot, shoot);
+    }
+
+    public static KeyCode StringToKeyCode(KeyCode code, string key)
+    {
+        try
+        {
+            Debug.Log($"Key: {key}");
+            return (KeyCode)System.Enum.Parse(typeof(KeyCode), key, true);
+        }
+        catch
+        {
+            Debug.LogError($"Invalid key string: {key}");
+            return code;
+        }
     }
 }
-

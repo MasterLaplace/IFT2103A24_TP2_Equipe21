@@ -18,6 +18,7 @@ public class Player : Flakkari4Unity.ECS.Entity
     private bool isLocalPlayer = true;
     [SerializeField] private GameObject skyBoxPrefab;
     private Vector3 mapLimit;
+    public PlayerControls playerControls;
     private readonly Dictionary<CurrentProtocol.EventId, CurrentProtocol.EventState> axisEvents = new(4);
 
     public void SetupCameraViewport(Rect viewport)
@@ -44,6 +45,12 @@ public class Player : Flakkari4Unity.ECS.Entity
             axisEvents[eventId] = CurrentProtocol.EventState.MAX_STATE;
     }
 
+    public void SetupControls(PlayerControls playerControls)
+    {
+        this.playerControls = playerControls;
+        Debug.Log("PlayerControls: " + playerControls.forward + " " + playerControls.back + " " + playerControls.shoot);
+    }
+
     public void SetupNetworkClient(NetworkClient networkClient)
     {
         this.networkClient = networkClient;
@@ -58,8 +65,8 @@ public class Player : Flakkari4Unity.ECS.Entity
         List<CurrentProtocol.Event> events = new(8);
         Dictionary<CurrentProtocol.EventId, float> axisValues = new(4);
 
-        Net_HandleMovement(networkClient, ref events, ref axisValues);
-        Net_HandleShooting(networkClient, ref events);
+        Net_HandleMovement(ref events, ref axisValues);
+        Net_HandleShooting(ref events);
 
         if (events.Count > 0 || axisValues.Count > 0)
             networkClient.Send(Flk_API.APIClient.ReqUserUpdates(events, axisValues));
@@ -72,12 +79,12 @@ public class Player : Flakkari4Unity.ECS.Entity
         SyncPositionWithCamera();
     }
 
-    private void Net_HandleMovement(NetworkClient networkClient, ref List<CurrentProtocol.Event> events, ref Dictionary<CurrentProtocol.EventId, float> axisValues)
+    private void Net_HandleMovement(ref List<CurrentProtocol.Event> events, ref Dictionary<CurrentProtocol.EventId, float> axisValues)
     {
-        HandleNetworkInput("Fire2", CurrentProtocol.EventId.MOVE_FRONT, ref events);
-        HandleNetworkInput("Fire1", CurrentProtocol.EventId.MOVE_BACK, ref events);
-        HandleNetworkInput(KeyCode.W, CurrentProtocol.EventId.MOVE_FRONT, ref events);
-        HandleNetworkInput(KeyCode.S, CurrentProtocol.EventId.MOVE_BACK, ref events);
+        // HandleNetworkInput("Fire2", CurrentProtocol.EventId.MOVE_FRONT, ref events);
+        // HandleNetworkInput("Fire1", CurrentProtocol.EventId.MOVE_BACK, ref events);
+        HandleNetworkInput(playerControls.forward, CurrentProtocol.EventId.MOVE_FRONT, ref events);
+        HandleNetworkInput(playerControls.back, CurrentProtocol.EventId.MOVE_BACK, ref events);
 
         if (Input.GetMouseButton(1))
         {
@@ -91,20 +98,20 @@ public class Player : Flakkari4Unity.ECS.Entity
         }
     }
 
-    private void HandleNetworkInput(string inputName, CurrentProtocol.EventId eventId, ref List<CurrentProtocol.Event> events)
-    {
-        if (Input.GetButtonDown(inputName))
-        {
-            events.Add(new CurrentProtocol.Event { id = eventId, state = CurrentProtocol.EventState.PRESSED });
-            Debug.Log("Input: " + inputName + " EventId: " + eventId + " EventState: " + CurrentProtocol.EventState.PRESSED);
-        }
+    // private void HandleNetworkInput(string inputName, CurrentProtocol.EventId eventId, ref List<CurrentProtocol.Event> events)
+    // {
+    //     if (Input.GetButtonDown(inputName))
+    //     {
+    //         events.Add(new CurrentProtocol.Event { id = eventId, state = CurrentProtocol.EventState.PRESSED });
+    //         Debug.Log("Input: " + inputName + " EventId: " + eventId + " EventState: " + CurrentProtocol.EventState.PRESSED);
+    //     }
 
-        else if (Input.GetButtonUp(inputName))
-        {
-            events.Add(new CurrentProtocol.Event { id = eventId, state = CurrentProtocol.EventState.RELEASED });
-            Debug.Log("Input: " + inputName + " EventId: " + eventId + " EventState: " + CurrentProtocol.EventState.RELEASED);
-        }
-    }
+    //     else if (Input.GetButtonUp(inputName))
+    //     {
+    //         events.Add(new CurrentProtocol.Event { id = eventId, state = CurrentProtocol.EventState.RELEASED });
+    //         Debug.Log("Input: " + inputName + " EventId: " + eventId + " EventState: " + CurrentProtocol.EventState.RELEASED);
+    //     }
+    // }
 
     private void HandleNetworkInput(KeyCode keyCode, CurrentProtocol.EventId eventId, ref List<CurrentProtocol.Event> events)
     {
@@ -171,7 +178,7 @@ public class Player : Flakkari4Unity.ECS.Entity
         }
     }
 
-    private void Net_HandleShooting(NetworkClient networkClient, ref List<CurrentProtocol.Event> events)
+    private void Net_HandleShooting(ref List<CurrentProtocol.Event> events)
     {
         if (Time.time - lastShotTime < cooldown)
             return;
@@ -182,38 +189,23 @@ public class Player : Flakkari4Unity.ECS.Entity
 
     private void HandleMovement()
     {
-        if (Input.GetButton("Fire2")) // move forward
-        {
-            Vector3 direction = playerCamera.transform.forward * velocity;
-            playerCamera.transform.position += direction * Time.deltaTime;
-        }
+        if (Input.GetKey(playerControls.forward))
+            playerCamera.transform.position += playerCamera.transform.forward * velocity * Time.deltaTime;
+        if (Input.GetKey(playerControls.back))
+            playerCamera.transform.position += -playerCamera.transform.forward * velocity * Time.deltaTime;
 
-        if (Input.GetButton("Fire1")) // move back
-        {
-            Vector3 direction = playerCamera.transform.forward * velocity;
-            playerCamera.transform.position += -direction * Time.deltaTime;
-        }
-
-        if (Input.GetKey(KeyCode.W))
-            playerCamera.transform.position += Vector3.forward * Time.deltaTime;
-        if (Input.GetKey(KeyCode.S))
-            playerCamera.transform.position += Vector3.back * Time.deltaTime;
-
-        if (Input.GetMouseButton(1))
-        {
-            playerCamera.transform.Rotate(Vector3.up, Input.GetAxis("Mouse X"));
-            playerCamera.transform.Rotate(Vector3.right, -Input.GetAxis("Mouse Y"));
-        }
-
-        float vertical2 = Input.GetAxis("Vertical");
-
-        if (vertical2 != 0)
-            playerCamera.transform.Rotate(Vector3.right, -vertical2 * 100 * Time.deltaTime);
-
-        float horizontal2 = Input.GetAxis("Horizontal");
-
-        if (horizontal2 != 0)
-            playerCamera.transform.Rotate(Vector3.forward, -horizontal2 * 100 * Time.deltaTime);
+        float vertical = Input.GetAxis("Mouse Y");
+        if (vertical != 0)
+            playerCamera.transform.Rotate(Vector3.right, -vertical);
+        float horizontal = Input.GetAxis("Mouse X");
+        if (horizontal != 0)
+            playerCamera.transform.Rotate(Vector3.forward, -horizontal);
+        vertical = Input.GetAxis("Vertical");
+        if (vertical != 0)
+            playerCamera.transform.Rotate(Vector3.right, -vertical);
+        horizontal = Input.GetAxis("Horizontal");
+        if (horizontal != 0)
+            playerCamera.transform.Rotate(Vector3.forward, -horizontal);
     }
 
     private void HandleShooting()
@@ -221,7 +213,8 @@ public class Player : Flakkari4Unity.ECS.Entity
         if (Time.time - lastShotTime < cooldown)
             return;
 
-        if (Input.GetMouseButtonUp(0) || Input.GetKeyUp(KeyCode.Joystick1Button5))
+        if (Input.GetKeyUp(playerControls.shoot))
+        // || Input.GetKeyUp(KeyCode.Joystick1Button5))
         {
             lastShotTime = Time.time;
 
@@ -230,7 +223,7 @@ public class Player : Flakkari4Unity.ECS.Entity
             Rigidbody rb = projectile.GetComponent<Rigidbody>();
             rb.velocity = playerCamera.transform.forward * projectileVelocity;
 
-            DestroyProjectile ds_script = projectile.GetComponent<DestroyProjectile>();
+            // DestroyProjectile ds_script = projectile.GetComponent<DestroyProjectile>();
         }
     }
 
@@ -245,6 +238,9 @@ public class Player : Flakkari4Unity.ECS.Entity
         if (health <= 0)
         {
             Debug.Log("Player died");
+            // if (!isLocalPlayer)
+            networkClient?.Send(Flk_API.APIClient.ReqDisconnect());
+
             Destroy(gameObject);
         }
     }

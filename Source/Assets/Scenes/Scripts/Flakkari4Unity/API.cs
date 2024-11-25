@@ -71,6 +71,18 @@ namespace Flakkari4Unity.API
                 CurrentProtocol.CommandId.REQ_HEARTBEAT
             );
         }
+/// <summary>
+        /// Creates a REQ_DISCONNECT message to disconnect from the server.
+        /// </summary>
+        /// <returns>A byte array representing the serialized REQ_DISCONNECT message.</returns>
+        public static byte[] ReqDisconnect()
+        {
+            Debug.Log("REQ_DISCONNECT message sent to the server.");
+            return CurrentProtocol.Packet.Serialize(
+                CurrentProtocol.Priority.HIGH,
+                CurrentProtocol.CommandId.REQ_DISCONNECT
+            );
+        }
 
         public static byte[] ReqEntitySpawn(byte[] payload, out ulong entityId, out string templateName)
         {

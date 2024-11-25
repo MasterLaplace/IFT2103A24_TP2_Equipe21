@@ -18,6 +18,7 @@ public class Player : Flakkari4Unity.ECS.Entity
     private bool isLocalPlayer = true;
     [SerializeField] private GameObject skyBoxPrefab;
     private Vector3 mapLimit;
+    public PlayerControls playerControls;
     private readonly Dictionary<CurrentProtocol.EventId, CurrentProtocol.EventState> axisEvents = new(4);
 
     public void SetupCameraViewport(Rect viewport)
@@ -42,6 +43,12 @@ public class Player : Flakkari4Unity.ECS.Entity
 
         foreach (CurrentProtocol.EventId eventId in System.Enum.GetValues(typeof(CurrentProtocol.EventId)))
             axisEvents[eventId] = CurrentProtocol.EventState.MAX_STATE;
+    }
+
+    public void SetupControls(PlayerControls playerControls)
+    {
+        this.playerControls = playerControls;
+        Debug.Log("PlayerControls: " + playerControls.forward + " " + playerControls.back + " " + playerControls.shoot);
     }
 
     public void SetupNetworkClient(NetworkClient networkClient)
@@ -70,14 +77,14 @@ public class Player : Flakkari4Unity.ECS.Entity
     }
 
     private void Net_HandleMovement(ref List<CurrentProtocol.Event> events, ref Dictionary<CurrentProtocol.EventId, float> axisValues)
-    {
-        HandleNetworkInput("Fire2", CurrentProtocol.EventId.MOVE_FRONT, ref events);
-        HandleNetworkInput("Fire1", CurrentProtocol.EventId.MOVE_BACK, ref events);
+    
+        HandleNetworkInput(playerControls.forward, CurrentProtocol.EventId.MOVE_FRONT, ref events);
+        HandleNetworkInput(playerControls.back, CurrentProtocol.EventId.MOVE_BACK, ref events);
 
-            HandleMouseMovement("Mouse X", CurrentProtocol.EventId.LOOK_LEFT, CurrentProtocol.EventId.LOOK_RIGHT, ref axisValues);
-            HandleMouseMovement("Mouse Y", CurrentProtocol.EventId.LOOK_DOWN, CurrentProtocol.EventId.LOOK_UP, ref axisValues);
-            HandleMouseMovement("Horizontal", CurrentProtocol.EventId.LOOK_LEFT, CurrentProtocol.EventId.LOOK_RIGHT, ref axisValues);
-            HandleMouseMovement("Vertical", CurrentProtocol.EventId.LOOK_DOWN, CurrentProtocol.EventId.LOOK_UP, ref axisValues);
+        HandleMouseMovement("Mouse X", CurrentProtocol.EventId.LOOK_LEFT, CurrentProtocol.EventId.LOOK_RIGHT, ref axisValues);
+        HandleMouseMovement("Mouse Y", CurrentProtocol.EventId.LOOK_DOWN, CurrentProtocol.EventId.LOOK_UP, ref axisValues);
+        HandleMouseMovement("Horizontal", CurrentProtocol.EventId.LOOK_LEFT, CurrentProtocol.EventId.LOOK_RIGHT, ref axisValues);
+        HandleMouseMovement("Vertical", CurrentProtocol.EventId.LOOK_DOWN, CurrentProtocol.EventId.LOOK_UP, ref axisValues);
     }
 
     private void HandleNetworkInput(string inputName, CurrentProtocol.EventId eventId, ref List<CurrentProtocol.Event> events)
@@ -140,27 +147,23 @@ public class Player : Flakkari4Unity.ECS.Entity
 
     private void HandleMovement()
     {
-    if (Input.GetButton("Fire2"))
-        {
-            Vector3 direction = playerCamera.transform.forward * velocity;
-            playerCamera.transform.position += direction * Time.deltaTime;
-        }
+        if (Input.GetKey(playerControls.forward))
+            playerCamera.transform.position += playerCamera.transform.forward * velocity * Time.deltaTime;
+        if (Input.GetKey(playerControls.back))
+            playerCamera.transform.position += -playerCamera.transform.forward * velocity * Time.deltaTime;
 
-    if (Input.GetButton("Fire1"))
-        {
-            Vector3 direction = playerCamera.transform.forward * velocity;
-            playerCamera.transform.position += -direction * Time.deltaTime;
-        }
-
-        float vertical2 = Input.GetAxis("Vertical");
-
-        if (vertical2 != 0)
-        playerCamera.transform.Rotate(Vector3.right, -vertical2);
-
-        float horizontal2 = Input.GetAxis("Horizontal");
-
-        if (horizontal2 != 0)
-        playerCamera.transform.Rotate(Vector3.forward, -horizontal2);
+        float vertical = Input.GetAxis("Mouse Y");
+        if (vertical != 0)
+            playerCamera.transform.Rotate(Vector3.right, -vertical);
+        float horizontal = Input.GetAxis("Mouse X");
+        if (horizontal != 0)
+            playerCamera.transform.Rotate(Vector3.forward, -horizontal);
+        vertical = Input.GetAxis("Vertical");
+        if (vertical != 0)
+            playerCamera.transform.Rotate(Vector3.right, -vertical);
+        horizontal = Input.GetAxis("Horizontal");
+        if (horizontal != 0)
+            playerCamera.transform.Rotate(Vector3.forward, -horizontal);
     }
 
     private void HandleShooting()
@@ -168,7 +171,7 @@ public class Player : Flakkari4Unity.ECS.Entity
         if (Time.time - lastShotTime < cooldown)
             return;
 
-        if (Input.GetKeyUp(KeyCode.Space) || Input.GetKeyUp(KeyCode.Joystick1Button5))
+        if (Input.GetKeyUp(playerControls.shoot))
         {
             lastShotTime = Time.time;
 

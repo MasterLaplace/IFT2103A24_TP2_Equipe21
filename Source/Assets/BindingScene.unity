@@ -784,7 +784,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3d12f6496d7be048a2f50ace65d370e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 6552552482338844279, guid: 7b564c9ab352fde4aa2d0b0a83aa7641, type: 3}
+  playerPrefab: {fileID: 3974978101357194217, guid: b7a6306b856666f46932b7eecba53f59, type: 3}
   parentContainer: {fileID: 199975108}
   horizontalSpacing: 170
   prefabSize: {x: 150, y: 150}
@@ -958,7 +958,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 382, y: -173}
+  m_AnchoredPosition: {x: 398, y: -173}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1500791819
@@ -1044,7 +1044,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: -55.708023, y: -111.98596, z: -165.87212, w: 66.878136}
+  m_margin: {x: -55.708023, y: -111.98596, z: -165.87212, w: 110.45331}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -1278,7 +1278,7 @@ Transform:
   m_GameObject: {fileID: 2145574076}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 226.78183, y: 278.89743, z: -3.5915604}
+  m_LocalPosition: {x: 832.78186, y: 278.89743, z: -3.5915604}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

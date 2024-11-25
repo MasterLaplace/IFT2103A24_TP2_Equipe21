@@ -1,43 +1,43 @@
 using UnityEngine;
-using TMPro; // Nécessaire pour utiliser TMP_Dropdown
+using TMPro; // Nécessaire pour utiliser TMP_InputField
 
 public class PlayerInputFields : MonoBehaviour
 {
-    public TMP_Dropdown dropdownForward;
-    public TMP_Dropdown dropdownBack;
-    public TMP_Dropdown dropdownShoot;
+    public TMP_InputField inputForward;
+    public TMP_InputField inputBack;
+    public TMP_InputField inputShoot;
 
     private void Awake()
     {
-        // Trouver tous les TMP_Dropdowns dans les enfants
-        TMP_Dropdown[] dropdowns = GetComponentsInChildren<TMP_Dropdown>();
+        // Trouver tous les TMP_InputFields dans les enfants
+        TMP_InputField[] inputFields = GetComponentsInChildren<TMP_InputField>();
 
-        Debug.Log($"Nombre de TMP_Dropdowns trouvés : {dropdowns.Length}");
+        Debug.Log($"Nombre de TMP_InputFields trouvés : {inputFields.Length}");
 
-        foreach (TMP_Dropdown dropdown in dropdowns)
+        foreach (TMP_InputField inputField in inputFields)
         {
-            Debug.Log($"Nom du TMP_Dropdown : {dropdown.name}");
-            switch (dropdown.name)
+            Debug.Log($"Nom du TMP_InputField : {inputField.name}");
+            switch (inputField.name)
             {
-                case "AvanceDropdown": // Correspond au nom dans la hiérarchie
-                    dropdownForward = dropdown;
+                case "AvanceInputField": // Correspond au nom dans la hiérarchie
+                    inputForward = inputField;
                     break;
-                case "TirerDropdown":
-                    dropdownShoot = dropdown;
+                case "TirerInputField":
+                    inputShoot = inputField;
                     break;
-                case "BackDropdown":
-                    dropdownBack = dropdown;
+                case "BackInputField":
+                    inputBack = inputField;
                     break;
             }
         }
 
         // Debug pour vérifier les assignations
-        Debug.Log($"Forward: {dropdownForward}, Shoot: {dropdownShoot}, Back: {dropdownBack}");
+        Debug.Log($"Forward: {inputForward}, Shoot: {inputShoot}, Back: {inputBack}");
 
         // Vérification des assignations
-        if (dropdownForward == null || dropdownShoot == null || dropdownBack == null)
+        if (inputForward == null || inputShoot == null || inputBack == null)
         {
-            Debug.LogError("Certains TMP_Dropdowns ne sont pas assignés !");
+            Debug.LogError("Certains TMP_InputFields ne sont pas assignés !");
         }
     }
 
@@ -45,9 +45,9 @@ public class PlayerInputFields : MonoBehaviour
     public PlayerControls GetPlayerControls()
     {
         return new PlayerControls(
-            dropdownForward.options[dropdownForward.value].text,
-            dropdownShoot.options[dropdownShoot.value].text,
-            dropdownBack.options[dropdownBack.value].text
+            inputForward.text,
+            inputShoot.text,
+            inputBack.text
         );
     }
 }

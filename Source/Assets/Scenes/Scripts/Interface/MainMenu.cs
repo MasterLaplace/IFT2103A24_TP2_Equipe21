@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
-using TMPro;
 public class MainMenu : MonoBehaviour
 {
     public GameObject playerPrefab; // Assigné dans l'inspecteur
@@ -36,32 +35,19 @@ public class MainMenu : MonoBehaviour
         SceneManager.LoadScene("MainMenu");
     }
     public void StartSimulation(List<PlayerControls> playerControls)
-{
-    if (BlackScreenPrefab == null)
     {
-        Debug.LogError("BlackScreenPrefab is not assigned in the inspector.");
-        return;
+        //met un ecran noir pour le chargement a mettre ici.
+        Instantiate(BlackScreenPrefab);
+        Debug.Log("player cintrôle count chatte : " + playerControls.Count);
+        // GameModeManager.Instance.IsNetworkMode = false;
+        GameModeManager.Instance.PlayerControls = new List<PlayerControls>(playerControls);
+        // Dictionary<int, PlayerControls> playerControlsCopy = new Dictionary<int, PlayerControls>(playerControls);
+        SceneManager.LoadScene("Simulation");
+        // delete the blackboard when the scene is loaded
+        while (GameObject.Find("BlackScreen(Clone)") != null)
+            Destroy(BlackScreenPrefab);
+        // SceneManager.LoadScene("Simulation");
     }
-
-    if (GameModeManager.Instance == null)
-    {
-        Debug.LogError("GameModeManager.Instance is null.");
-        return;
-    }
-
-    if (playerControls == null)
-    {
-        Debug.LogError("playerControls is not initialized.");
-        return;
-    }
-
-    Instantiate(BlackScreenPrefab);
-    GameModeManager.Instance.PlayerControls = new List<PlayerControls>(playerControls);
-    SceneManager.LoadScene("Simulation");
-
-    while (GameObject.Find("BlackScreen(Clone)") != null)
-        Destroy(BlackScreenPrefab);
-}
 
     public void StartMultiplayer()
     {
@@ -115,17 +101,23 @@ public class MainMenu : MonoBehaviour
             var newPlayerCase = Instantiate(playerPrefab, parentContainer);
             newPlayerCase.name = "Player " + (i + 1);
 
-            // RectTransform rectTransform = newPlayerCase.GetComponent<RectTransform>();
-            // if (rectTransform != null)
-            // {
-            //     rectTransform.sizeDelta = prefabSize;
-            //     rectTransform.anchorMin = new Vector2(0, 0.5f);
-            //     rectTransform.anchorMax = new Vector2(0, 0.5f);
-            //     rectTransform.pivot = new Vector2(0, 0.5f);
-            //     rectTransform.anchoredPosition = new Vector2(i * horizontalSpacing + initialOffset, 0);
-            // }
-        }
+            RectTransform rectTransform = newPlayerCase.GetComponent<RectTransform>();
+            if (rectTransform != null)
+            {
+                rectTransform.sizeDelta = prefabSize;
+                rectTransform.anchorMin = new Vector2(0, 0.5f);
+                rectTransform.anchorMax = new Vector2(0, 0.5f);
+                rectTransform.pivot = new Vector2(0, 0.5f);
+                rectTransform.anchoredPosition = new Vector2(i * horizontalSpacing + initialOffset, 0);
+            }
 
+            // Initialiser le script PlayerInputFields pour s'assurer qu'il détecte les TMP_InputFields
+            PlayerInputFields playerInputFields = newPlayerCase.GetComponent<PlayerInputFields>();
+            if (playerInputFields == null)
+            {
+                Debug.LogError($"Le prefab {newPlayerCase.name} ne contient pas le script PlayerInputFields !");
+            }
+        }
     }
 
       private void OnEnable()
@@ -138,25 +130,21 @@ public class MainMenu : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-public void SavePlayerControls()
-{
-    playerControls.Clear();
-
-    Debug.Log("parentContainer.childCount : " + parentContainer?.childCount);
-    for (int i = 0; i < parentContainer.childCount; i++)
+    public void SavePlayerControls()
     {
-        var dropdown = parentContainer.GetChild(i).GetComponent<TMP_Dropdown>();
-        if (dropdown != null)
+        playerControls.Clear();
+
+        Debug.Log("parentContainer.childCount : " + parentContainer?.childCount);
+        for (int i = 0; i < parentContainer.childCount; i++)
         {
-            PlayerControls controls = new PlayerControls(
-                dropdown.options[dropdown.value].text,
-                dropdown.options[dropdown.value].text,
-                dropdown.options[dropdown.value].text
-            );
-            playerControls.Add(controls);
-            Debug.Log($"Joueur {i + 1}: Avancer={controls.forward}");
+            var playerCase = parentContainer.GetChild(i).GetComponent<PlayerInputFields>();
+            if (playerCase != null)
+            {
+                playerControls.Add(playerCase.GetPlayerControls());
+                // Debug.Log($"Joueur {i + 1}: Avancer={playerControls[i].forward}, Tirer={playerControls[i].shoot}, Reculer={playerControls[i].back}");
+            }
         }
+        Debug.Log("playerControls.Count bite : " + playerControls.Count);
+        StartSimulation(playerControls);
     }
-    StartSimulation(playerControls);
-}
 }

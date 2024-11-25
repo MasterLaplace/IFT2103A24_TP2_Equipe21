@@ -248,17 +248,17 @@ namespace Flakkari4Unity.Protocol
         /// </summary>
         public enum EventId : byte
         {
-            MOVE_LEFT = 10,
-            MOVE_RIGHT = 11,
-            MOVE_UP = 12,
-            MOVE_DOWN = 13,
-            MOVE_FRONT = 14,
-            MOVE_BACK = 15,
-            LOOK_LEFT = 16,
-            LOOK_RIGHT = 17,
-            LOOK_UP = 18,
-            LOOK_DOWN = 19,
-            SHOOT = 20,
+            MOVE_LEFT = 0,
+            MOVE_RIGHT = 1,
+            MOVE_UP = 2,
+            MOVE_DOWN = 3,
+            MOVE_FRONT = 4,
+            MOVE_BACK = 5,
+            LOOK_LEFT = 6,
+            LOOK_RIGHT = 7,
+            LOOK_UP = 8,
+            LOOK_DOWN = 9,
+            SHOOT = 10,
             MAX_EVENT
         }
 

@@ -104,7 +104,7 @@ MonoBehaviour:
   playerCount: 1
   rows: 1
   networkMode: 1
-  serverIP: 172.31.1.246
+  serverIP: 127.0.0.1
   serverPort: 54000
   gameName: SpaceWar
 --- !u!114 &5816347255148828882

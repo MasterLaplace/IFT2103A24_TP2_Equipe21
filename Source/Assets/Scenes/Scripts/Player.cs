@@ -77,7 +77,7 @@ public class Player : Flakkari4Unity.ECS.Entity
     }
 
     private void Net_HandleMovement(ref List<CurrentProtocol.Event> events, ref Dictionary<CurrentProtocol.EventId, float> axisValues)
-    
+    {
         HandleNetworkInput(playerControls.forward, CurrentProtocol.EventId.MOVE_FRONT, ref events);
         HandleNetworkInput(playerControls.back, CurrentProtocol.EventId.MOVE_BACK, ref events);
 
@@ -126,7 +126,7 @@ public class Player : Flakkari4Unity.ECS.Entity
         }
     }
 
-    private void HandleMouseMovement(string axisName, CurrentProtocol.EventId negativeEventId, CurrentProtocol.EventId positiveEventId , ref Dictionary<CurrentProtocol.EventId, float> axisValues)
+    private void HandleMouseMovement(string axisName, CurrentProtocol.EventId negativeEventId, CurrentProtocol.EventId positiveEventId, ref Dictionary<CurrentProtocol.EventId, float> axisValues)
     {
         float axisValue = Input.GetAxis(axisName);
 

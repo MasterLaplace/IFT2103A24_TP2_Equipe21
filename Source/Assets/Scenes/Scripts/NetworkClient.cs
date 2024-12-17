@@ -77,7 +77,7 @@ public class NetworkClient : MonoBehaviour
         if (!enable)
             return;
 
-            byte[] receivedData = udpClient.EndReceive(result, ref serverEndpoint);
+        byte[] receivedData = udpClient.EndReceive(result, ref serverEndpoint);
         Flk_API.APIClient.Reply(receivedData, out List<CurrentProtocol.CommandId> commandId, out List<ulong> sequenceNumber, out List<byte[]> payloads);
         byte[] payload;
 

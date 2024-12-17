@@ -145,6 +145,100 @@ public class Player : Flakkari4Unity.ECS.Entity
         HandleNetworkInput(KeyCode.Joystick1Button5, CurrentProtocol.EventId.SHOOT, ref events);
     }
 
+    private void Net_HandleMovement(NetworkClient networkClient)
+    {
+        List<CurrentProtocol.Event> events = new(8);
+
+        HandleNetworkInput("Fire2", CurrentProtocol.EventId.MOVE_FRONT, ref events);
+        HandleNetworkInput("Fire1", CurrentProtocol.EventId.MOVE_BACK, ref events);
+        HandleNetworkInput(KeyCode.W, CurrentProtocol.EventId.MOVE_FRONT, ref events);
+        HandleNetworkInput(KeyCode.S, CurrentProtocol.EventId.MOVE_BACK, ref events);
+
+        if (Input.GetMouseButton(1))
+        {
+            HandleMouseMovement("Mouse X", CurrentProtocol.EventId.LOOK_LEFT, CurrentProtocol.EventId.LOOK_RIGHT, ref events);
+            HandleMouseMovement("Mouse Y", CurrentProtocol.EventId.LOOK_DOWN, CurrentProtocol.EventId.LOOK_UP, ref events);
+        }
+        else
+        {
+            HandleMouseMovement("Horizontal", CurrentProtocol.EventId.LOOK_LEFT, CurrentProtocol.EventId.LOOK_RIGHT, ref events);
+            HandleMouseMovement("Vertical", CurrentProtocol.EventId.LOOK_DOWN, CurrentProtocol.EventId.LOOK_UP, ref events);
+        }
+
+    }
+
+    private void HandleNetworkInput(string inputName, CurrentProtocol.EventId eventId, ref List<CurrentProtocol.Event> events)
+    {
+        if (Input.GetButtonDown(inputName))
+        {
+            events.Add(new CurrentProtocol.Event { id = eventId, state = CurrentProtocol.EventState.PRESSED });
+            Debug.Log("Input: " + inputName + " EventId: " + eventId + " EventState: " + CurrentProtocol.EventState.PRESSED);
+        }
+
+        else if (Input.GetButtonUp(inputName))
+        {
+            events.Add(new CurrentProtocol.Event { id = eventId, state = CurrentProtocol.EventState.RELEASED });
+            Debug.Log("Input: " + inputName + " EventId: " + eventId + " EventState: " + CurrentProtocol.EventState.RELEASED);
+        }
+    }
+
+    private void HandleNetworkInput(KeyCode keyCode, CurrentProtocol.EventId eventId, ref List<CurrentProtocol.Event> events)
+    {
+        if (Input.GetKeyDown(keyCode))
+        {
+            events.Add(new CurrentProtocol.Event { id = eventId, state = CurrentProtocol.EventState.PRESSED });
+            Debug.Log("Input: " + keyCode + " EventId: " + eventId + " EventState: " + CurrentProtocol.EventState.PRESSED);
+        }
+
+        else if (Input.GetKeyUp(keyCode))
+        {
+            events.Add(new CurrentProtocol.Event { id = eventId, state = CurrentProtocol.EventState.RELEASED });
+            Debug.Log("Input: " + keyCode + " EventId: " + eventId + " EventState: " + CurrentProtocol.EventState.RELEASED);
+        }
+    }
+
+    private void HandleMouseMovement(string axisName, CurrentProtocol.EventId negativeEventId, CurrentProtocol.EventId positiveEventId, ref List<CurrentProtocol.Event> events)
+    {
+        float axisValue = Input.GetAxis(axisName);
+
+        if (axisValue < 0 && axisEvents[negativeEventId] != CurrentProtocol.EventState.PRESSED)
+        {
+            axisEvents[negativeEventId] = CurrentProtocol.EventState.PRESSED;
+            axisEvents[positiveEventId] = CurrentProtocol.EventState.RELEASED;
+            events.Add(new CurrentProtocol.Event { id = negativeEventId, state = CurrentProtocol.EventState.PRESSED });
+            Debug.Log("Input: " + axisName + " EventId: " + negativeEventId + " EventState: " + CurrentProtocol.EventState.PRESSED);
+        }
+        else if (axisValue > 0 && axisEvents[positiveEventId] != CurrentProtocol.EventState.PRESSED)
+        {
+            axisEvents[positiveEventId] = CurrentProtocol.EventState.PRESSED;
+            axisEvents[negativeEventId] = CurrentProtocol.EventState.RELEASED;
+            events.Add(new CurrentProtocol.Event { id = positiveEventId, state = CurrentProtocol.EventState.PRESSED });
+            Debug.Log("Input: " + axisName + " EventId: " + positiveEventId + " EventState: " + CurrentProtocol.EventState.PRESSED);
+        }
+
+        if (axisValue == 0 && axisEvents[negativeEventId] == CurrentProtocol.EventState.PRESSED)
+        {
+            axisEvents[negativeEventId] = CurrentProtocol.EventState.RELEASED;
+            events.Add(new CurrentProtocol.Event { id = negativeEventId, state = CurrentProtocol.EventState.RELEASED });
+            Debug.Log("Input: " + axisName + " EventId: " + negativeEventId + " EventState: " + CurrentProtocol.EventState.RELEASED);
+        }
+        if (axisValue == 0 && axisEvents[positiveEventId] == CurrentProtocol.EventState.PRESSED)
+        {
+            axisEvents[positiveEventId] = CurrentProtocol.EventState.RELEASED;
+            events.Add(new CurrentProtocol.Event { id = positiveEventId, state = CurrentProtocol.EventState.RELEASED });
+            Debug.Log("Input: " + axisName + " EventId: " + positiveEventId + " EventState: " + CurrentProtocol.EventState.RELEASED);
+        }
+    }
+
+    private void Net_HandleShooting(NetworkClient networkClient)
+    {
+        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Joystick1Button5))
+        {
+            byte[] packet = Flk_API.APIClient.ReqUserUpdate(CurrentProtocol.EventId.SHOOT, CurrentProtocol.EventState.RELEASED);
+            networkClient.Send(packet);
+        }
+    }
+
     private void HandleMovement()
     {
         if (Input.GetKey(playerControls.forward))

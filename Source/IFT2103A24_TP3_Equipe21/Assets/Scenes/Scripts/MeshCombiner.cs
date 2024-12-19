@@ -2,15 +2,14 @@ using UnityEngine;
 
 public class MeshCombiner : MonoBehaviour
 {
-    void Start()
+    public void Start()
     {
         CombineMeshes();
         AdjustBoxCollider();
     }
 
-    void CombineMeshes()
+    private void CombineMeshes()
     {
-        // Récupère tous les MeshFilter des enfants
         MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
         if (meshFilters.Length < 2)
         {
@@ -23,47 +22,48 @@ public class MeshCombiner : MonoBehaviour
         int i = 0;
         foreach (MeshFilter meshFilter in meshFilters)
         {
-            if (meshFilter.gameObject == gameObject) continue; // Ignore le parent lui-même
+            if (meshFilter.gameObject == gameObject)
+                continue;
+
             combine[i].mesh = meshFilter.sharedMesh;
             combine[i].transform = meshFilter.transform.localToWorldMatrix;
-            meshFilter.gameObject.SetActive(false); // Désactive les objets sources
             i++;
         }
 
-        // Vérifie et ajoute les composants nécessaires
-        MeshFilter meshFilterParent = GetComponent<MeshFilter>();
-        if (!meshFilterParent)
-        {
-            meshFilterParent = gameObject.AddComponent<MeshFilter>();
-        }
+        MeshFilter meshFilterParent = GetComponent<MeshFilter>() ?? gameObject.AddComponent<MeshFilter>();
 
-        MeshRenderer meshRendererParent = GetComponent<MeshRenderer>();
-        if (!meshRendererParent)
-        {
-            _ = gameObject.AddComponent<MeshRenderer>();
-        }
+        // MeshRenderer meshRendererParent = GetComponent<MeshRenderer>() ?? gameObject.AddComponent<MeshRenderer>();
 
-        // Applique le maillage combiné au parent
         Mesh combinedMesh = new();
         meshFilterParent.mesh = combinedMesh;
         combinedMesh.CombineMeshes(combine);
 
-        // Assure que le parent est actif pour afficher le résultat
-        gameObject.SetActive(true);
+        // Material[] materials = new Material[meshFilters.Length];
+
+        // for (int j = 0; j < meshFilters.Length; j++)
+        // {
+        //     materials[j] = meshFilters[j].GetComponent<Renderer>().material;
+        // }
+
+        // meshRendererParent.materials = materials;
+
+        // foreach (Transform child in transform)
+        // {
+        //     if (child.gameObject != gameObject)
+        //     {
+        //         Destroy(child.gameObject);
+        //     }
+        // }
     }
 
-    void AdjustBoxCollider()
+    private void AdjustBoxCollider()
     {
-        // Ajoute un BoxCollider s'il n'existe pas
         BoxCollider boxCollider = GetComponent<BoxCollider>() ?? gameObject.AddComponent<BoxCollider>();
 
-        // Récupère le maillage combiné
         Mesh combinedMesh = GetComponent<MeshFilter>().mesh;
 
-        // Calculer les dimensions du maillage combiné
         Bounds bounds = combinedMesh.bounds;
 
-        // Appliquer les dimensions et la position au BoxCollider
         boxCollider.center = bounds.center;
         boxCollider.size = bounds.size;
     }

@@ -6,7 +6,7 @@ public class TextureAssigner : MonoBehaviour
     {
         Transform[] transforms = GetComponentsInChildren<Transform>();
         foreach (Transform t in transforms)
-        {
+    {
             if (t.gameObject.name == "Body")
             {
                 Material bodyMaterial = t.gameObject.GetComponent<Renderer>().material;

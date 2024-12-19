@@ -18,6 +18,11 @@ public class Spawner : MonoBehaviour
         Instantiate(objectPrefab, transform.position, transform.rotation);
     }
 
+    public GameObject CreateEmpty()
+    {
+        return Instantiate(new GameObject(), transform.position, transform.rotation);
+    }
+
     public void Start()
     {
         InvokeRepeating(nameof(SpawnObject), spawnTime, spawnTime);

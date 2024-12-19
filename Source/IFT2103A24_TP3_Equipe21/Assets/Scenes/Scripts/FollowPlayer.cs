@@ -5,7 +5,6 @@ public class FollowPlayer : MonoBehaviour
     public GameObject playerPrefab = null;
     public Vector3 offset = new(0, 1, -1);
     public float rotationSpeed = 5.0f;
-
     private Vector3 currentRotation;
 
     public void Update()

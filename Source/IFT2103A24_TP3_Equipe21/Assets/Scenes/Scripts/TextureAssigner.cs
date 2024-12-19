@@ -9,25 +9,15 @@ public class TextureAssigner : MonoBehaviour
         {
             if (t.gameObject.name == "Body")
             {
-                // Material bodyMaterial = t.gameObject.GetComponent<Material>();
-                Material bodyMaterial = new(Shader.Find("Standard"))
-                {
-                    mainTexture = Resources.Load<Texture>("Textures/danslaplace")
-                };
-                // bodyMaterial.mainTexture = Resources.Load<Texture>("Textures/C6");
+                Material bodyMaterial = t.gameObject.GetComponent<Renderer>().material;
 
-                t.gameObject.GetComponent<Renderer>().material = bodyMaterial;
+                bodyMaterial.mainTexture = Resources.Load<Texture>("Textures/C6");
             }
             if (t.gameObject.name == "Head")
             {
-                // Material headMaterial = t.gameObject.GetComponent<Material>();
-                Material headMaterial = new(Shader.Find("Standard"))
-                {
-                    mainTexture = Resources.Load<Texture>("Textures/C6")
-                };
-                // headMaterial.mainTexture = Resources.Load<Texture>("Textures/C6");
+                Material headMaterial = t.gameObject.GetComponent<Renderer>().material;
 
-                t.gameObject.GetComponent<Renderer>().material = headMaterial;
+                headMaterial.mainTexture = Resources.Load<Texture>("Textures/danslaplace");
             }
         }
     }

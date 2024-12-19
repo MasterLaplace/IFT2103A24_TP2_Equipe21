@@ -9,8 +9,7 @@ public class SoundManager : PersistentSingleton<SoundManager>
     public AudioSource nextTrack;     // Piste suivante à jouer
     public float bpm = 120f;          // Battements par minute
     public float fadeDuration = 1f;   // Durée du fondu croisé
-
-    private float beatDuration;
+    private float beatDuration = 0f;  // Durée d'un battement
 
     public void Start()
     {
@@ -66,7 +65,7 @@ public class SoundManager : PersistentSingleton<SoundManager>
         source.Play();
     }
 
-    public void AddSpatializedFoley(GameObject obj, string name, float volume, float minDistance, float maxDistance)
+    public void AddSpatializedFoley(GameObject obj, string name, float volume, float minDistance, float maxDistance, bool loop = true)
     {
         AudioSource source;
 
@@ -84,8 +83,8 @@ public class SoundManager : PersistentSingleton<SoundManager>
             source.clip = Resources.Load<AudioClip>($"Audio/{name}");
             source.spatialBlend = 1.0f;
             source.volume = volume;
-            source.loop = true;
-            source.playOnAwake = true;
+            source.loop = loop;
+            source.playOnAwake = false;
             source.rolloffMode = AudioRolloffMode.Linear;
             source.minDistance = minDistance;
             source.maxDistance = maxDistance;

@@ -10,7 +10,7 @@ public class Invoker : MonoBehaviour
         commandQueue.Enqueue(command);
     }
 
-    void Update()
+    public void Update()
     {
         if (commandQueue.Count > 0)
         {

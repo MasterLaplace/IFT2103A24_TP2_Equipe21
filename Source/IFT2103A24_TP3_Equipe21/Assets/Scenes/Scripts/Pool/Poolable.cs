@@ -12,8 +12,7 @@ public abstract class Poolable : MonoBehaviour
     /// <summary>
     /// Called when the object is taken out of the pool.
     /// </summary>
-    /// <param name="args">Optional parameters that may be unused.</param>
-    public virtual void OnUnpool(params object[] args)
+    public virtual void OnUnpool()
     {
         gameObject.SetActive(true);
     }

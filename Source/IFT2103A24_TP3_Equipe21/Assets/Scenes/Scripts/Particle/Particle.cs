@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Particle : Poolable
@@ -7,9 +5,9 @@ public class Particle : Poolable
     public ParticleSystem particle;
 
     // Démarre l'effet de particules avec des paramètres personnalisés.
-    public override void OnUnpool(params object[] args)
+    public override void OnUnpool()
     {
-        base.OnUnpool(args);
+        base.OnUnpool();
         particle.Play();
     }
 

@@ -9,30 +9,15 @@ public class JumpCommand : Command
         this.actor = actor;
     }
 
-            // // Play a sound effect
-            // AudioSource audio = GetComponent<AudioSource>();
-            // audio.Play();
-
-            // // Play a particle effect
-            // ParticleSystem particles = GetComponent<ParticleSystem>();
-            // particles.Play();
-
-            // // Play an animation
-            // Animator animator = GetComponent<Animator>();
-            // animator.SetTrigger("Jump");
-
-            // Play a screen shake
-            // CameraShake cameraShake = Camera.main.GetComponent<CameraShake>();
-            // cameraShake.Shake(0.1f, 0.1f);
-
     public override void Execute()
     {
         SoundManager.Instance.PlaySpatialSoundEffect(actor.gameObject, SoundManager.ChooseRandomTrackSoundEffect(), 1.0f, 1.0f, 100.0f);
 
+        _ = Pool.Instance.Get<Particle>(actor);
+
         // animation.SetTrigger("Jump");
 
-        CameraShake cameraShake = Camera.main.GetComponent<CameraShake>();
-        cameraShake.Shake(0.1f, 0.1f);
+        Camera.main.GetComponent<CameraShake>().Shake(0.1f, 0.1f);
     }
 
     public override void Undo()

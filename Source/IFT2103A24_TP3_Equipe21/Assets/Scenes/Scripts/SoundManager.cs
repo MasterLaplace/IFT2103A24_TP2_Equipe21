@@ -55,7 +55,6 @@ public class SoundManager : Singleton<SoundManager>
         base.Awake();
         beatDuration = 60f / bpm;
         SceneManager.sceneLoaded += OnSceneLoaded;
-        OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
     }
 
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)

@@ -11,13 +11,13 @@ public class Pool : Singleton<Pool>
     protected override void Awake()
     {
         base.Awake();
-        Cache.name = $"{objectPrefab.name} Pool";
         SceneManager.sceneLoaded += OnSceneLoaded;
-        OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
     }
 
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        Cache.name = $"{objectPrefab.name} Pool";
+
         if (scene.name == "Simulation")
             Init(10);
         else

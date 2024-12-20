@@ -9,7 +9,6 @@ public class Invoker : Singleton<Invoker>
     {
         base.Awake();
         SceneManager.sceneLoaded += OnSceneLoaded;
-        OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
     }
 
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)

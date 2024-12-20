@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 
-public class SoundManager : MonoBehaviour
+public class SoundManager : Singleton<SoundManager>
 {
     public List<KeyValuePair<string, AudioSource>> audioLayers = new();
     public Queue<int> deadTracks = new(); // Piste supprimée
@@ -27,17 +28,17 @@ public class SoundManager : MonoBehaviour
         // vocal
     }
 
-    private string ChooseRandomTrackMelody()
+    public static string ChooseRandomTrackMelody()
     {
         return melodies[UnityEngine.Random.Range(0, melodies.Length)];
     }
 
-    private string ChooseRandomTrackFoley()
+    public static string ChooseRandomTrackFoley()
     {
         return foleys[UnityEngine.Random.Range(0, foleys.Length)];
     }
 
-    private string ChooseRandomTrackSoundEffect()
+    public static string ChooseRandomTrackSoundEffect()
     {
         return soundEffects[UnityEngine.Random.Range(0, soundEffects.Length)];
     }
@@ -49,11 +50,20 @@ public class SoundManager : MonoBehaviour
         return ++currentTrackID;
     }
 
-    public void Start()
+    protected override void Awake()
     {
+        base.Awake();
         beatDuration = 60f / bpm;
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
+    }
 
-        PlayMusic(ChooseRandomTrackMelody(), 1.0f);
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "Simulation")
+            PlayMusic(ChooseRandomTrackMelody(), 1.0f);
+        else
+            PlayMusic(ChooseRandomTrackMelody(), 1.0f);
     }
 
     public void FixedUpdate()

@@ -23,7 +23,7 @@ public class Particle : Poolable
         // Retourne automatiquement les particules au pool une fois terminées.
         if (!particle.IsAlive())
         {
-            // Pool.Instance.ReturnToPool(this);
+            Pool.Instance.Return(this);
         }
     }
 }

@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    private readonly Dictionary<KeyCode, Command> commands = new();
     public float speed = 10.0f;
     public float jumpForce = 10.0f;
     private bool isGrounded = false;
@@ -9,6 +11,13 @@ public class PlayerController : MonoBehaviour
     public void Start()
     {
         isGrounded = true;
+
+        // Assigner les commandes aux touches
+        commands[KeyCode.Space] = new JumpCommand(transform);
+        commands[KeyCode.W] = new MoveCommand(transform, Vector3.forward);
+        commands[KeyCode.S] = new MoveCommand(transform, Vector3.back);
+        commands[KeyCode.A] = new MoveCommand(transform, Vector3.left);
+        commands[KeyCode.D] = new MoveCommand(transform, Vector3.right);
     }
 
     public void Update()
@@ -19,6 +28,14 @@ public class PlayerController : MonoBehaviour
         right.y = 0;
         forward.Normalize();
         right.Normalize();
+
+        foreach (var entry in commands)
+        {
+            if (Input.GetKeyDown(entry.Key))
+            {
+                Invoker.Instance.AddCommand(entry.Value);
+            }
+        }
 
         if (Input.GetKey(KeyCode.W))
         {

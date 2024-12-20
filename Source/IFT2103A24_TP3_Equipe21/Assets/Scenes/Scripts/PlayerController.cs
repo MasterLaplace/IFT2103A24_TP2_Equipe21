@@ -6,14 +6,11 @@ public class PlayerController : MonoBehaviour
     private readonly Dictionary<KeyCode, Command> commands = new();
     public float speed = 10.0f;
     public float jumpForce = 10.0f;
-    private bool isGrounded = false;
 
     public void Start()
     {
-        isGrounded = true;
-
         // Assigner les commandes aux touches
-        commands[KeyCode.Space] = new JumpCommand(transform);
+        commands[KeyCode.Space] = new JumpCommand(transform, jumpForce);
         commands[KeyCode.W] = new MoveCommand(transform, Vector3.forward);
         commands[KeyCode.S] = new MoveCommand(transform, Vector3.back);
         commands[KeyCode.A] = new MoveCommand(transform, Vector3.left);
@@ -52,21 +49,6 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.D))
         {
             transform.position += right * speed * Time.deltaTime;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-        {
-            Rigidbody rb = GetComponent<Rigidbody>();
-            rb.AddForce(new Vector3(0, jumpForce, 0), ForceMode.Impulse);
-            isGrounded = false;
-        }
-    }
-
-    public void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = true;
         }
     }
 }

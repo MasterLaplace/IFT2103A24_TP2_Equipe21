@@ -5385,6 +5385,7 @@ GameObject:
   - component: {fileID: 1865675254}
   - component: {fileID: 1865675256}
   - component: {fileID: 1865675255}
+  - component: {fileID: 1865675257}
   m_Layer: 0
   m_Name: BonHomme
   m_TagString: Untagged
@@ -5495,6 +5496,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 612d7fc737617ab48a957dfea5ce253a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1865675257
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1865675247}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9f0d4bc14666094f8426e997340f7d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  anticipationTime: 0.2
+  jumpHeight: 2
+  jumpSpeed: 1
+  squashFactor: 0.5
 --- !u!4 &2081639344 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1296129924700169554, guid: f919503c3e4173b47be3501c790c32a1, type: 3}
@@ -5603,6 +5620,10 @@ PrefabInstance:
     - target: {fileID: 8306563808980898803, guid: f919503c3e4173b47be3501c790c32a1, type: 3}
       propertyPath: scale.y
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8306563808980898803, guid: f919503c3e4173b47be3501c790c32a1, type: 3}
+      propertyPath: rotation.x
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 0}

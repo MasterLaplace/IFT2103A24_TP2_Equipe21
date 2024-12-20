@@ -2,171 +2,197 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SoundManager : MonoBehaviour // PersistentSingleton<SoundManager>
+public class SoundManager : MonoBehaviour
 {
-    public Dictionary<string, KeyValuePair<AudioClip, AudioSource>> audioSources = new();
-    public AudioSource currentTrack = null;   // Piste actuellement en cours
-    public AudioSource nextTrack = null;     // Piste suivante à jouer
+    public List<KeyValuePair<string, AudioSource>> audioLayers = new();
+    public Queue<int> deadTracks = new(); // Piste supprimée
+    public int currentTrack = 0;   // Piste actuellement en cours
+    public int nextTrack = 0;     // Piste suivante à jouer
     public float bpm = 120f;          // Battements par minute
     public float fadeDuration = 5.0f;   // Durée du fondu croisé
     private float beatDuration = 0f;  // Durée d'un battement
     private float lastTime = 0f;      // Dernier temps de mise à jour
-    private const float timeBeforeSwitch = 30.0f; // Temps avant de changer de piste
-    private static readonly string[] strings = { "Lena_Raine-Creator", "C418-Aria_Math" };
+    private float timeBeforeSwitch = 30.0f; // Temps avant de changer de piste
+    private static readonly string[] melodies = { "Lena_Raine-Creator", "C418-Aria_Math" };
+    private static readonly string[] foleys = { "Sound_Effect_TV-Wind_Sound_SOUND_EFFECT", "freesound_community-quiet_nature_sounds" };
+    private static readonly string[] soundEffects = { "freesound_community-quiet_nature_sounds", "JDG_Le_bruit_d'un_scorpion_qui_meurt_(mp3cut.net)" };
+    private static readonly string[][] audios = { foleys, soundEffects, melodies };
+    private int currentTrackID = -1;
 
-    private string ChooseRandomTrack()
+    enum Layer
     {
-        return strings[UnityEngine.Random.Range(0, strings.Length)];
+        Folley,
+        SoundEffect,
+        Melody
+        // vocal
+    }
+
+    private string ChooseRandomTrackMelody()
+    {
+        return melodies[UnityEngine.Random.Range(0, melodies.Length)];
+    }
+
+    private string ChooseRandomTrackFoley()
+    {
+        return foleys[UnityEngine.Random.Range(0, foleys.Length)];
+    }
+
+    private string ChooseRandomTrackSoundEffect()
+    {
+        return soundEffects[UnityEngine.Random.Range(0, soundEffects.Length)];
+    }
+
+    private int GetTrackId()
+    {
+        if (deadTracks.Count > 0)
+            return deadTracks.Dequeue();
+        return ++currentTrackID;
     }
 
     public void Start()
     {
         beatDuration = 60f / bpm;
 
-        PlayMusic(ChooseRandomTrack(), 1.0f);
-
-        // GameObject gameObject = new("BackgroundMusic");
-        // gameObject.transform.position = new Vector3(0, 0, 0);
-        // AddSpatializedFoley(gameObject, "Lena_Raine-Creator", 0f, 5.0f, 20.0f);
-        // AddSpatializedFoley(gameObject, "Sound_Effect_T-Wind_Sound_SOUND_EFFECT", 0f, 5.0f, 20.0f);
-
-        // foreach (KeyValuePair<string, KeyValuePair<AudioClip, AudioSource>> audioSource in audioSources)
-        // {
-        //     if (audioSource.Value.Value == null)
-        //         continue;
-
-        //     Debug.Log($"Audio source: {audioSource.Key}");
-        //     audioSource.Value.Value.Play();
-        // }
+        PlayMusic(ChooseRandomTrackMelody(), 1.0f);
     }
-
-    // protected override void Awake()
-    // {
-    //     base.Awake();
-    // }
 
     public void FixedUpdate()
     {
-        if (currentTrack == null)
-            return;
-
         if (Time.time - lastTime > timeBeforeSwitch)
         {
             lastTime = Time.time;
-            PlayMusic(ChooseRandomTrack(), 1.0f);
+            PlayMusic(ChooseRandomTrackMelody(), 1.0f);
         }
     }
 
-    public void PlaySpatialSoundEffect(GameObject obj, string name, float volume, float minDistance, float maxDistance)
+    public void Update()
     {
-        AudioSource source;
-
-        if (audioSources.ContainsKey(name))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            obj.TryGetComponent<AudioSource>(out source);
-            source.clip = audioSources[name].Key;
-            source.volume = volume;
-            source.minDistance = minDistance;
-            source.maxDistance = maxDistance;
+            PlaySpatialSoundEffect(gameObject, ChooseRandomTrackSoundEffect(), 1.0f, 1.0f, 10.0f);
+        }
+    }
+
+    public uint PlaySpatialSoundEffect(GameObject obj, string name, float volume, float minDistance, float maxDistance)
+    {
+        AudioSource source = obj.AddComponent<AudioSource>();
+        source.clip = Resources.Load<AudioClip>($"Audio/{name}");
+        source.spatialBlend = 1.0f;
+        source.volume = volume;
+        source.loop = false;
+        source.playOnAwake = false;
+        source.rolloffMode = AudioRolloffMode.Linear;
+        source.minDistance = minDistance;
+        source.maxDistance = maxDistance;
+
+        source.Play();
+
+        int id = GetTrackId();
+        if (id < audioLayers.Count)
+        {
+            audioLayers[id] = new KeyValuePair<string, AudioSource>(name, source);
         }
         else
         {
-            source = obj.AddComponent<AudioSource>();
-            source.clip = Resources.Load<AudioClip>($"Audio/{name}");
-            source.spatialBlend = 1.0f;
-            source.volume = volume;
-            source.loop = false;
-            source.playOnAwake = false;
-            source.rolloffMode = AudioRolloffMode.Linear;
-            source.minDistance = minDistance;
-            source.maxDistance = maxDistance;
-
-            audioSources.Add(name, new KeyValuePair<AudioClip, AudioSource>(source.clip, null));
+            audioLayers.Add(new KeyValuePair<string, AudioSource>(name, source));
         }
 
-        source.Play();
+        StartCoroutine(DestroyAfterPlay(source, id));
+        return (uint)id;
     }
 
-    public void AddSpatializedFoley(GameObject obj, string name, float volume, float minDistance, float maxDistance, bool loop = true)
+    public uint PlaySpatializedFoley(GameObject obj, string name, float volume, float minDistance, float maxDistance, bool loop = true)
     {
-        AudioSource source;
+        AudioSource source = obj.AddComponent<AudioSource>();
+        source.clip = Resources.Load<AudioClip>($"Audio/{name}");
+        source.spatialBlend = 1.0f;
+        source.volume = volume;
+        source.loop = loop;
+        source.playOnAwake = false;
+        source.rolloffMode = AudioRolloffMode.Linear;
+        source.minDistance = minDistance;
+        source.maxDistance = maxDistance;
 
-        if (audioSources.ContainsKey(name))
+        source.Play();
+
+        int id = GetTrackId();
+        if (id < audioLayers.Count)
         {
-            obj.TryGetComponent<AudioSource>(out source);
-            source.clip = audioSources[name].Key;
-            source.volume = volume;
-            source.minDistance = minDistance;
-            source.maxDistance = maxDistance;
+            audioLayers[id] = new KeyValuePair<string, AudioSource>(name, source);
         }
         else
         {
-            source = obj.AddComponent<AudioSource>();
-            source.clip = Resources.Load<AudioClip>($"Audio/{name}");
-            source.spatialBlend = 1.0f;
-            source.volume = volume;
-            source.loop = loop;
-            source.playOnAwake = false;
-            source.rolloffMode = AudioRolloffMode.Linear;
-            source.minDistance = minDistance;
-            source.maxDistance = maxDistance;
-
-            audioSources.Add(name, new KeyValuePair<AudioClip, AudioSource>(source.clip, null));
+            audioLayers.Add(new KeyValuePair<string, AudioSource>(name, source));
         }
+
+        if (!loop)
+        {
+            StartCoroutine(DestroyAfterPlay(source, id));
+        }
+
+        return (uint)id;
+    }
+
+    private System.Collections.IEnumerator DestroyAfterPlay(AudioSource source, int id)
+    {
+        yield return new WaitForSeconds(source.clip.length);
+        deadTracks.Enqueue(id);
+        Destroy(source);
+    }
+
+    public uint PlayMusic(string name, float volume)
+    {
+        AudioSource source = gameObject.AddComponent<AudioSource>();
+        source.clip = Resources.Load<AudioClip>($"Audio/{name}");
+        source.volume = volume;
+        source.loop = true;
+        source.playOnAwake = true;
+
+        int id = GetTrackId();
+        if (id < audioLayers.Count)
+        {
+            audioLayers[id] = new KeyValuePair<string, AudioSource>(name, source);
+            Debug.Log($"Emplace {audioLayers[id].Value.clip.name} at {id}/{audioLayers.Count}");
+        }
+        else
+        {
+            audioLayers.Add(new KeyValuePair<string, AudioSource>(name, source));
+            Debug.Log($"Add {audioLayers[id].Value.clip.name} at {id}/{audioLayers.Count}");
+        }
+
+        if (currentTrackID != 0)
+        {
+            Debug.Log($"Switching to {name} with id {id}");
+            SwitchTrack(id);
+            return (uint)id;
+        }
+
+        currentTrack = id;
+        timeBeforeSwitch = source.clip.length - fadeDuration;
+
+        Debug.Log($"Playing {name} with id {id}");
 
         source.Play();
+        return (uint)id;
     }
 
-    public void PlayMusic(string name, float volume)
+    public void SwitchTrack(int id)
     {
-        if (!audioSources.ContainsKey(name) || !audioSources[name].Value)
-        {
-            AudioSource source = gameObject.AddComponent<AudioSource>();
-            source.clip = Resources.Load<AudioClip>($"Audio/{name}");
-            source.volume = volume;
-            source.loop = true;
-            source.playOnAwake = true;
-
-            audioSources.Add(name, new KeyValuePair<AudioClip, AudioSource>(source.clip, source));
-        }
-
-        if (currentTrack != null)
-        {
-            SwitchTrack(name);
-            return;
-        }
-
-        currentTrack = audioSources[name].Value;
-        currentTrack.volume = volume;
-
-        currentTrack.Play();
-    }
-
-    public void SwitchTrack(string newClip)
-    {
-        Debug.Log($"Switching to {newClip}");
         // Trouver le temps restant jusqu'au prochain battement
-        float timeToNextBeat = beatDuration - (currentTrack.time % beatDuration);
-        AudioClip newClipAudio = Resources.Load<AudioClip>($"Audio/{newClip}");
-        StartCoroutine(SwitchAfterDelay(newClipAudio, timeToNextBeat));
+        float timeToNextBeat = beatDuration - (audioLayers[currentTrack].Value.time % beatDuration);
+        nextTrack = id;
+        StartCoroutine(SwitchAfterDelay(timeToNextBeat));
     }
 
-    private System.Collections.IEnumerator SwitchAfterDelay(AudioClip newClip, float delay)
+    private System.Collections.IEnumerator SwitchAfterDelay(float delay)
     {
         // Attendre jusqu'au prochain battement
         yield return new WaitForSeconds(delay);
 
-        if (nextTrack == null)
-        {
-            nextTrack = gameObject.AddComponent<AudioSource>();
-            nextTrack.loop = true;
-        }
-
         // Configurer la nouvelle piste
-        nextTrack.clip = newClip;
-        nextTrack.volume = 0f;
-        nextTrack.time = currentTrack.time % beatDuration; // Synchronisation des trames
-        nextTrack.Play();
+        audioLayers[nextTrack].Value.volume = 0f;
+        audioLayers[nextTrack].Value.time = audioLayers[currentTrack].Value.time % beatDuration; // Synchronisation des trames
+        audioLayers[nextTrack].Value.Play();
 
         // Effectuer le fondu croisé
         float timer = 0f;
@@ -175,32 +201,38 @@ public class SoundManager : MonoBehaviour // PersistentSingleton<SoundManager>
             timer += Time.deltaTime;
             float t = timer / fadeDuration;
 
-            currentTrack.volume = Mathf.Lerp(1f, 0f, t);
-            nextTrack.volume = Mathf.Lerp(0f, 1f, t);
+            audioLayers[currentTrack].Value.volume = Mathf.Lerp(1f, 0f, t);
+            audioLayers[nextTrack].Value.volume = Mathf.Lerp(0f, 1f, t);
 
             yield return null;
         }
 
         // Finaliser la transition
-        currentTrack.Stop();
+        audioLayers[currentTrack].Value.Stop();
+
+        deadTracks.Enqueue(currentTrack);
+        Destroy(audioLayers[currentTrack].Value);
+
         (nextTrack, currentTrack) = (currentTrack, nextTrack);
+
+        timeBeforeSwitch = audioLayers[currentTrack].Value.clip.length - fadeDuration;
     }
 
-    public void ActivateLayer(string name)
+    public void ActivateLayer(uint id)
     {
-        if (audioSources.ContainsKey(name) && audioSources[name].Value != null)
-            audioSources[name].Value.volume = 1f;
+        if (audioLayers[(int)id].Value != null)
+            audioLayers[(int)id].Value.volume = 1f;
     }
 
-    public void DeactivateLayer(string name)
+    public void DeactivateLayer(uint id)
     {
-        if (audioSources.ContainsKey(name) && audioSources[name].Value != null)
-            audioSources[name].Value.volume = 0f;
+        if (audioLayers[(int)id].Value != null)
+            audioLayers[(int)id].Value.volume = 0f;
     }
 
-    public void SetLayerVolume(string name, float volume)
+    public void SetLayerVolume(uint id, float volume)
     {
-        if (audioSources.ContainsKey(name) && audioSources[name].Value != null)
-            audioSources[name].Value.volume = Mathf.Clamp01(volume);
+        if (audioLayers[(int)id].Value != null)
+            audioLayers[(int)id].Value.volume = Mathf.Clamp01(volume);
     }
 }

@@ -3,10 +3,20 @@ using UnityEngine;
 
 public class MeshCombiner : MonoBehaviour
 {
+    public GameObject playerPartPrefab;
+    private int playerPartCount = 0;
+
     public void Start()
     {
         CombineMeshes();
         AdjustBoxCollider();
+    }
+
+    public void CreateChildrenMeshes()
+    {
+        GameObject playerPart = Instantiate(playerPartPrefab, transform.position + Vector3.right * playerPartCount, Quaternion.identity);
+        playerPart.name = $"PlayerPart{playerPartCount++}";
+        AddChildrenMesh(playerPart);
     }
 
     public void AddChildrenMesh(GameObject gameObject)

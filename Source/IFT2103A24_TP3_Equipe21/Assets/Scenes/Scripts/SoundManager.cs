@@ -15,7 +15,7 @@ public class SoundManager : MonoBehaviour
     private float timeBeforeSwitch = 30.0f; // Temps avant de changer de piste
     private static readonly string[] melodies = { "Lena_Raine-Creator", "C418-Aria_Math" };
     private static readonly string[] foleys = { "Sound_Effect_TV-Wind_Sound_SOUND_EFFECT", "freesound_community-quiet_nature_sounds" };
-    private static readonly string[] soundEffects = { "freesound_community-quiet_nature_sounds", "JDG_Le_bruit_d'un_scorpion_qui_meurt_(mp3cut.net)" };
+    private static readonly string[] soundEffects = { "JDG_Le_bruit_d'un_scorpion_qui_meurt_(mp3cut.net)" };
     private static readonly string[][] audios = { foleys, soundEffects, melodies };
     private int currentTrackID = -1;
 
@@ -69,7 +69,7 @@ public class SoundManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            PlaySpatialSoundEffect(gameObject, ChooseRandomTrackSoundEffect(), 1.0f, 1.0f, 10.0f);
+            PlaySpatialSoundEffect(gameObject, ChooseRandomTrackSoundEffect(), 1.0f, 1.0f, 100.0f);
         }
     }
 

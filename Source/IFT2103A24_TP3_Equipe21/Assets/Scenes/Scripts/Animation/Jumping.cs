@@ -75,6 +75,8 @@ public class Jumping : Animate
         {
             yield return null;
         }
+
+        Invoker.Instance.DeleteFromHistory($"Jump_{gameObject.name}");
     }
 
     public void OnCollisionEnter(Collision collision)

@@ -28,7 +28,7 @@ public class PlayerController : MonoBehaviour
 
         foreach (var entry in commands)
         {
-            if (Input.GetKeyDown(entry.Key))
+            if (Input.GetKeyDown(entry.Key) && !Invoker.Instance.InHistory(entry.Value))
             {
                 Invoker.Instance.AddCommand(entry.Value);
             }

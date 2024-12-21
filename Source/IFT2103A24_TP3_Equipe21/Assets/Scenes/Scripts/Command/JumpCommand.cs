@@ -5,7 +5,7 @@ public class JumpCommand : Command
     private readonly Transform actor;
     private readonly float jumpForce = 10.0f;
 
-    public JumpCommand(Transform actor, params object[] args)
+    public JumpCommand(Transform actor, params object[] args) : base($"Jump_{actor.name}")
     {
         if (args.Length > 0 && args[0] is float v)
         {

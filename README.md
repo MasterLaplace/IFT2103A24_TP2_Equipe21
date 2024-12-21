@@ -24,6 +24,17 @@
 - `Effet de particules`: Les particules sont utilisées pour simuler un effet de feux _(poussière)_ lorsqu'un agent saute.
 - Un système de Pooling est utilisé pour réutiliser les particules et les sauvegarder en cache pour éviter de les recréer à chaque fois.
 
+**Ambiance sonore**
+- `Ambiance sonore`: Des musiques d'ambiances sont jouée en boucle pour donner une ambiance relaxante au jeu.
+- Des Folleys sont joués aléatoirement.
+- Les volumes des musiques et des folleys(ambience) sont ajustables dans le menu.
+
+**Effets sonores**
+- `Effets sonores`: Des effets sonores sont joués lorsqu'un agent saute ou que le bouto play est cliqué.
+- Pour le bouton play, l'effet est choisi mais pour le saut, l'effet est choisi aléatoirement parmi une liste d'effets.
+- Tout les effets sonores/folley peuvent être spacialisé mais pas la musique d'ambiance.
+- Chaque track de son peut être activé/désactivé ou changer de volume individuellement.
+
 **Fonctionnalité optionnelle:**
 - Musique dynamique (par : Guillaume Papineau) @MasterLaplace
   - Uitilisation du fondu croisé plus du bpm pour les transitions entre les différentes musiques.

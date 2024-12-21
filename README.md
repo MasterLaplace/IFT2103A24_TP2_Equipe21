@@ -23,6 +23,7 @@
 - La scale du joueur peut être modifié de 0.5 à 2.0 grace au slider.
 - Le volume de la musique, des effets sonores et de l'amiance sonore peut être modifié grace au slider.
 - Un son est joué lorsqu'on appui sur le bouton play.
+- Pour cliquer sur les boutons, il faut que le curseur soit sur le bas du bouton pour que le clic soit pris en compte.
 
 **Effets de particules**
 - `Effet de particules`: Les particules sont utilisées pour simuler un effet de feux _(poussière)_ lorsqu'un agent saute.

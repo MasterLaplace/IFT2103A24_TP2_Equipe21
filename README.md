@@ -9,8 +9,27 @@
 - La liste des effets sonores et de leur contexte d’utilisation
 - La description de la fonctionnalité optionnelle
 
+**Animation des agents**
+- `Squash and Stretch`: Les agents sont animés avec un effet de squash and stretch pour donner un effet de ressort lorsqu'ils se sautent.
+- `Anticipation`: Les agents anticipent leur saut en se baissant avant de sauter.
+- `Amortissement`: Les agents amortissent leur saut naturellemenetn après le saut.
+- `interpolation linéaire`: Les agents se déplacent de manière linéaire entre deux points. (l'initial et la hauteur du saut)
+- Déclenchement de l'animation: Les agents déclenchent leur animation de saut lorsqu'ils sautent (appelle de la command `jump` via l'`Invoker`).
+
+**Animation de l’interface**
+
+- a complete
+
+**Effets de particules**
+- `Effet de particules`: Les particules sont utilisées pour simuler un effet de feux _(poussière)_ lorsqu'un agent saute.
+- Un système de Pooling est utilisé pour réutiliser les particules et les sauvegarder en cache pour éviter de les recréer à chaque fois.
+
 **Fonctionnalité optionnelle:**
 - Musique dynamique (par : Guillaume Papineau) @MasterLaplace
+  - Uitilisation du fondu croisé plus du bpm pour les transitions entre les différentes musiques.
+  - Changement automatique de la musique si une musique est terminée ou que la scène change.
+  - Possibilité d'activer ou de désactiver une track de sons musique/folley/SFX.
+  - Possibilité de changer le volume par layer de musique (musique/folley/SFX).
 - Personnalisation de l’avatar (par : Martin Boucault) @Martin-Boucault-35
 
 ## Usage Direct

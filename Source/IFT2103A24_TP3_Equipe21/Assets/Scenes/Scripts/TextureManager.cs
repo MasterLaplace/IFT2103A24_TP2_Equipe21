@@ -18,8 +18,6 @@ public class TextureManager : MonoBehaviour
     {
         var materials = Resources.LoadAll<Material>(folderPath);
 
-        Debug.Log("Materials found: " + materials.Length);
-
         foreach (var material in materials)
         {
             if (material.mainTexture == null)

@@ -13,12 +13,12 @@ public class MoveCommand : Command
         this.actor = actor;
     }
 
-    public override void Setup(params object[] args)
-    {
-    }
-
     public override void Execute()
     {
+        if (actor.TryGetComponent(out Movement mouv))
+        {
+            mouv.PerformAnimation();
+        }
     }
 
     public override void Undo()

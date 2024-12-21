@@ -18,7 +18,7 @@ public class SoundManager : Singleton<SoundManager>
     private static readonly List<string> foleys =  new() { "Sound_Effect_TV-Wind_Sound_SOUND_EFFECT", "freesound_community-quiet_nature_sounds" };
     private static readonly List<string> soundEffects =  new() { "JDG_Le_bruit_d'un_scorpion_qui_meurt_(mp3cut.net)", "squalala" };
     private int currentTrackID = -1;
-    private float[] volumeLayers = { 1.0f, 1.0f, 1.0f };
+    private readonly float[] volumeLayers = { 1.0f, 1.0f, 1.0f };
 
     public enum Layer
     {
@@ -60,7 +60,10 @@ public class SoundManager : Singleton<SoundManager>
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         if (scene.name == "Simulation")
+        {
             PlayMusic(ChooseRandomTrackMelody());
+            PlaySpatializedFoley(ChooseRandomTrackFoley(), true);
+        }
         else
             PlayMusic(ChooseRandomTrackMelody());
     }
@@ -72,14 +75,6 @@ public class SoundManager : Singleton<SoundManager>
             lastTime = Time.time;
             PlayMusic(ChooseRandomTrackMelody());
         }
-    }
-
-    public void Update()
-    {
-        // if (Input.GetKeyDown(KeyCode.Space))
-        // {
-        //     PlaySpatialSoundEffect(gameObject, ChooseRandomTrackSoundEffect(), 1.0f, 1.0f, 100.0f);
-        // }
     }
 
     public uint PlaySpatialSoundEffect(GameObject obj, string name, float minDistance, float maxDistance)
@@ -145,6 +140,34 @@ public class SoundManager : Singleton<SoundManager>
         source.rolloffMode = AudioRolloffMode.Linear;
         source.minDistance = minDistance;
         source.maxDistance = maxDistance;
+
+        source.Play();
+
+        int id = GetTrackId();
+        if (id < audioLayers.Count)
+        {
+            audioLayers[id] = new KeyValuePair<string, AudioSource>(name, source);
+        }
+        else
+        {
+            audioLayers.Add(new KeyValuePair<string, AudioSource>(name, source));
+        }
+
+        if (!loop)
+        {
+            StartCoroutine(DestroyAfterPlay(source, id));
+        }
+
+        return (uint)id;
+    }
+
+    public uint PlaySpatializedFoley(string name, bool loop = true)
+    {
+        AudioSource source = gameObject.AddComponent<AudioSource>();
+        source.clip = Resources.Load<AudioClip>($"Audio/{name}");
+        source.volume = volumeLayers[(int)Layer.Folley];
+        source.loop = loop;
+        source.playOnAwake = false;
 
         source.Play();
 
@@ -251,22 +274,31 @@ public class SoundManager : Singleton<SoundManager>
         timeBeforeSwitch = audioLayers[currentTrack].Value.clip.length - fadeDuration;
     }
 
-    public void ActivateTrack(uint id)
+    public bool ActivateTrack(uint id)
     {
-        if (audioLayers[(int)id].Value != null)
-            audioLayers[(int)id].Value.volume = 1f;
+        if (audioLayers[(int)id].Value == null)
+            return false;
+
+        audioLayers[(int)id].Value.volume = 1f;
+        return true;
     }
 
-    public void DeactivateTrack(uint id)
+    public bool DeactivateTrack(uint id)
     {
-        if (audioLayers[(int)id].Value != null)
-            audioLayers[(int)id].Value.volume = 0f;
+        if (audioLayers[(int)id].Value == null)
+            return false;
+
+        audioLayers[(int)id].Value.volume = 0f;
+        return true;
     }
 
-    public void SetTrackVolume(uint id, float volume)
+    public bool SetTrackVolume(uint id, float volume)
     {
-        if (audioLayers[(int)id].Value != null)
-            audioLayers[(int)id].Value.volume = Mathf.Clamp01(volume);
+        if (audioLayers[(int)id].Value == null)
+            return false;
+
+        audioLayers[(int)id].Value.volume = Mathf.Clamp01(volume);
+        return true;
     }
 
     public void SetLayerVolume(Layer layer, float volume)

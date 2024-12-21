@@ -12,6 +12,7 @@ public class PlayButtonManager : MonoBehaviour
     public void OnClick()
     {
         Debug.Log("Loading simulation scene...");
+        _ = Pool.Instance.Get<Particle>(gameObject.transform);
         SoundManager.Instance.PlaySpatialSoundEffect("squalala");
         SceneManager.LoadScene("Simulation");
     }

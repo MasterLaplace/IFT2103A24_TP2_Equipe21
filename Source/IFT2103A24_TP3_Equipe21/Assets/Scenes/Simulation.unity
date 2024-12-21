@@ -257,8 +257,8 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
-  m_Intensity: 1
+  m_Color: {r: 0.6037736, g: 0.5246176, b: 0.31043077, a: 1}
+  m_Intensity: 0.2
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -591,6 +591,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1440561782}
   - component: {fileID: 1440561781}
+  - component: {fileID: 1440561783}
   m_Layer: 0
   m_Name: SoundManager
   m_TagString: Untagged
@@ -629,6 +630,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1440561783
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1440561780}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9ac948de898b3d41a1aafbc956f4e58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &1453410461 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1296129924700169554, guid: f919503c3e4173b47be3501c790c32a1, type: 3}
@@ -651,7 +664,7 @@ GameObject:
   - component: {fileID: 1865675258}
   m_Layer: 0
   m_Name: BonHomme
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

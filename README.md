@@ -18,7 +18,11 @@
 
 **Animation de l’interface**
 
-- a complete
+- Le nombre de bouton de l'interface est dynamique en fonction du nombre de materials disponibles.
+- Il y a une animation de fade in et fade out lorsqu'on appui sur un bouton.
+- La scale du joueur peut être modifié de 0.5 à 2.0 grace au slider.
+- Le volume de la musique, des effets sonores et de l'amiance sonore peut être modifié grace au slider.
+- Un son est joué lorsqu'on appui sur le bouton play.
 
 **Effets de particules**
 - `Effet de particules`: Les particules sont utilisées pour simuler un effet de feux _(poussière)_ lorsqu'un agent saute.
@@ -42,6 +46,8 @@
   - Possibilité d'activer ou de désactiver une track de sons musique/folley/SFX.
   - Possibilité de changer le volume par layer de musique (musique/folley/SFX).
 - Personnalisation de l’avatar (par : Martin Boucault) @Martin-Boucault-35
+  - Le joueur peut changer la taille de son avatar.
+  - Le joueur peut changer la texture de son avatar.
 
 ## Usage Direct
 

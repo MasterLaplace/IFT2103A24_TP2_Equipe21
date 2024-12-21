@@ -61,6 +61,16 @@ public class MeshCombiner : MonoBehaviour
 
             Material material = meshFilter.GetComponent<Renderer>().material;
 
+            var tg = PlayerDetailsManager.Instance.playerDetails;
+            if (tg.ContainsKey(meshFilter.gameObject.name) && tg[meshFilter.gameObject.name].material != null)
+            {
+                material = tg[meshFilter.gameObject.name].material;
+            }
+            if (tg.ContainsKey(meshFilter.gameObject.name))
+            {
+                gameObject.transform.localScale = new Vector3(tg[meshFilter.gameObject.name].scale, tg[meshFilter.gameObject.name].scale, tg[meshFilter.gameObject.name].scale);
+            }
+
             int materialIndex = materials.IndexOf(material);
             if (materialIndex == -1)
             {

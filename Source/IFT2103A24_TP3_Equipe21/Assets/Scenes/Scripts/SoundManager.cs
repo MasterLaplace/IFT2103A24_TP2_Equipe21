@@ -14,13 +14,13 @@ public class SoundManager : Singleton<SoundManager>
     private float beatDuration = 0f;  // Durée d'un battement
     private float lastTime = 0f;      // Dernier temps de mise à jour
     private float timeBeforeSwitch = 30.0f; // Temps avant de changer de piste
-    private static readonly string[] melodies = { "Lena_Raine-Creator", "C418-Aria_Math" };
-    private static readonly string[] foleys = { "Sound_Effect_TV-Wind_Sound_SOUND_EFFECT", "freesound_community-quiet_nature_sounds" };
-    private static readonly string[] soundEffects = { "JDG_Le_bruit_d'un_scorpion_qui_meurt_(mp3cut.net)" };
-    private static readonly string[][] audios = { foleys, soundEffects, melodies };
+    private static readonly List<string> melodies = new() { "Lena_Raine-Creator", "C418-Aria_Math" };
+    private static readonly List<string> foleys =  new() { "Sound_Effect_TV-Wind_Sound_SOUND_EFFECT", "freesound_community-quiet_nature_sounds" };
+    private static readonly List<string> soundEffects =  new() { "JDG_Le_bruit_d'un_scorpion_qui_meurt_(mp3cut.net)", "squalala" };
     private int currentTrackID = -1;
+    private float[] volumeLayers = { 1.0f, 1.0f, 1.0f };
 
-    enum Layer
+    public enum Layer
     {
         Folley,
         SoundEffect,
@@ -30,17 +30,17 @@ public class SoundManager : Singleton<SoundManager>
 
     public static string ChooseRandomTrackMelody()
     {
-        return melodies[UnityEngine.Random.Range(0, melodies.Length)];
+        return melodies[UnityEngine.Random.Range(0, melodies.Count)];
     }
 
     public static string ChooseRandomTrackFoley()
     {
-        return foleys[UnityEngine.Random.Range(0, foleys.Length)];
+        return foleys[UnityEngine.Random.Range(0, foleys.Count)];
     }
 
     public static string ChooseRandomTrackSoundEffect()
     {
-        return soundEffects[UnityEngine.Random.Range(0, soundEffects.Length)];
+        return soundEffects[UnityEngine.Random.Range(0, soundEffects.Count)];
     }
 
     private int GetTrackId()
@@ -60,9 +60,9 @@ public class SoundManager : Singleton<SoundManager>
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         if (scene.name == "Simulation")
-            PlayMusic(ChooseRandomTrackMelody(), 1.0f);
+            PlayMusic(ChooseRandomTrackMelody());
         else
-            PlayMusic(ChooseRandomTrackMelody(), 1.0f);
+            PlayMusic(ChooseRandomTrackMelody());
     }
 
     public void FixedUpdate()
@@ -70,24 +70,24 @@ public class SoundManager : Singleton<SoundManager>
         if (Time.time - lastTime > timeBeforeSwitch)
         {
             lastTime = Time.time;
-            PlayMusic(ChooseRandomTrackMelody(), 1.0f);
+            PlayMusic(ChooseRandomTrackMelody());
         }
     }
 
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            PlaySpatialSoundEffect(gameObject, ChooseRandomTrackSoundEffect(), 1.0f, 1.0f, 100.0f);
-        }
+        // if (Input.GetKeyDown(KeyCode.Space))
+        // {
+        //     PlaySpatialSoundEffect(gameObject, ChooseRandomTrackSoundEffect(), 1.0f, 1.0f, 100.0f);
+        // }
     }
 
-    public uint PlaySpatialSoundEffect(GameObject obj, string name, float volume, float minDistance, float maxDistance)
+    public uint PlaySpatialSoundEffect(GameObject obj, string name, float minDistance, float maxDistance)
     {
         AudioSource source = obj.AddComponent<AudioSource>();
         source.clip = Resources.Load<AudioClip>($"Audio/{name}");
         source.spatialBlend = 1.0f;
-        source.volume = volume;
+        source.volume = volumeLayers[(int)Layer.SoundEffect];
         source.loop = false;
         source.playOnAwake = false;
         source.rolloffMode = AudioRolloffMode.Linear;
@@ -110,12 +110,36 @@ public class SoundManager : Singleton<SoundManager>
         return (uint)id;
     }
 
-    public uint PlaySpatializedFoley(GameObject obj, string name, float volume, float minDistance, float maxDistance, bool loop = true)
+    public uint PlaySpatialSoundEffect(string name)
+    {
+        AudioSource source = gameObject.AddComponent<AudioSource>();
+        source.clip = Resources.Load<AudioClip>($"Audio/{name}");
+        source.volume = volumeLayers[(int)Layer.SoundEffect];
+        source.loop = false;
+        source.playOnAwake = false;
+
+        source.Play();
+
+        int id = GetTrackId();
+        if (id < audioLayers.Count)
+        {
+            audioLayers[id] = new KeyValuePair<string, AudioSource>(name, source);
+        }
+        else
+        {
+            audioLayers.Add(new KeyValuePair<string, AudioSource>(name, source));
+        }
+
+        StartCoroutine(DestroyAfterPlay(source, id));
+        return (uint)id;
+    }
+
+    public uint PlaySpatializedFoley(GameObject obj, string name, float minDistance, float maxDistance, bool loop = true)
     {
         AudioSource source = obj.AddComponent<AudioSource>();
         source.clip = Resources.Load<AudioClip>($"Audio/{name}");
         source.spatialBlend = 1.0f;
-        source.volume = volume;
+        source.volume = volumeLayers[(int)Layer.Folley];
         source.loop = loop;
         source.playOnAwake = false;
         source.rolloffMode = AudioRolloffMode.Linear;
@@ -149,11 +173,11 @@ public class SoundManager : Singleton<SoundManager>
         Destroy(source);
     }
 
-    public uint PlayMusic(string name, float volume)
+    public uint PlayMusic(string name)
     {
         AudioSource source = gameObject.AddComponent<AudioSource>();
         source.clip = Resources.Load<AudioClip>($"Audio/{name}");
-        source.volume = volume;
+        source.volume = volumeLayers[(int)Layer.Melody];
         source.loop = true;
         source.playOnAwake = true;
 
@@ -210,8 +234,8 @@ public class SoundManager : Singleton<SoundManager>
             timer += Time.deltaTime;
             float t = timer / fadeDuration;
 
-            audioLayers[currentTrack].Value.volume = Mathf.Lerp(1f, 0f, t);
-            audioLayers[nextTrack].Value.volume = Mathf.Lerp(0f, 1f, t);
+            audioLayers[currentTrack].Value.volume = Mathf.Lerp(volumeLayers[(int)Layer.Melody], 0f, t);
+            audioLayers[nextTrack].Value.volume = Mathf.Lerp(0f, volumeLayers[(int)Layer.Melody], t);
 
             yield return null;
         }
@@ -227,21 +251,42 @@ public class SoundManager : Singleton<SoundManager>
         timeBeforeSwitch = audioLayers[currentTrack].Value.clip.length - fadeDuration;
     }
 
-    public void ActivateLayer(uint id)
+    public void ActivateTrack(uint id)
     {
         if (audioLayers[(int)id].Value != null)
             audioLayers[(int)id].Value.volume = 1f;
     }
 
-    public void DeactivateLayer(uint id)
+    public void DeactivateTrack(uint id)
     {
         if (audioLayers[(int)id].Value != null)
             audioLayers[(int)id].Value.volume = 0f;
     }
 
-    public void SetLayerVolume(uint id, float volume)
+    public void SetTrackVolume(uint id, float volume)
     {
         if (audioLayers[(int)id].Value != null)
             audioLayers[(int)id].Value.volume = Mathf.Clamp01(volume);
+    }
+
+    public void SetLayerVolume(Layer layer, float volume)
+    {
+        Debug.Log($"Setting volume for {layer} to {volume}");
+        foreach (var audio in audioLayers)
+        {
+            if (melodies.Contains(audio.Key) && layer == Layer.Melody)
+            {
+                audio.Value.volume = volume;
+            }
+            else if (foleys.Contains(audio.Key) && layer == Layer.Folley)
+            {
+                audio.Value.volume = volume;
+            }
+            else if (soundEffects.Contains(audio.Key) && layer == Layer.SoundEffect)
+            {
+                audio.Value.volume = volume;
+            }
+        }
+        volumeLayers[(int)layer] = volume;
     }
 }

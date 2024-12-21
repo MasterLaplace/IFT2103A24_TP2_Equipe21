@@ -1,22 +1,20 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.IO;
 using TMPro;
+
 public class TextureManager : MonoBehaviour
 {
     public GameObject buttonPrefab; // Le prefab du bouton
     public Transform headTexturePanel; // Panel pour les textures de tête
     public Transform bodyTexturePanel; // Panel pour les textures de corps
-    public Renderer headRenderer; // Renderer pour la tête
-    public Renderer bodyRenderer; // Renderer pour le corps
 
-    private void Start()
+    public void Start()
     {
-        LoadTextures("Materials", headTexturePanel, headRenderer);
-        LoadTextures("Materials", bodyTexturePanel, bodyRenderer);
+        LoadTextures("Materials", headTexturePanel, "Head");
+        LoadTextures("Materials", bodyTexturePanel, "Body");
     }
 
-    void LoadTextures(string folderPath, Transform panel, Renderer targetRenderer)
+    private void LoadTextures(string folderPath, Transform panel, string type)
     {
         var materials = Resources.LoadAll<Material>(folderPath);
 
@@ -26,7 +24,6 @@ public class TextureManager : MonoBehaviour
         {
             if (material.mainTexture == null)
             {
-                Debug.LogWarning("Material " + material.name + " has no texture.");
                 continue;
             }
 
@@ -48,17 +45,15 @@ public class TextureManager : MonoBehaviour
             TextMeshProUGUI buttonText = button.GetComponentInChildren<TextMeshProUGUI>(); // Utilise TextMeshPro si tu utilises TMP
             if (buttonText != null)
             {
-                buttonText.text = material.name; // Afficher le nom du matériau
+                buttonText.text = "Texture for "+ type + ": " + material.name; // Afficher le nom du matériau
             }
 
-            button.GetComponent<Button>().onClick.AddListener(() => ApplyTexture(targetRenderer, material));
+            button.GetComponent<Button>().onClick.AddListener(() => ApplyTexture(type, material));
         }
     }
 
-
-
-    void ApplyTexture(Renderer renderer, Material material)
+    void ApplyTexture(string type, Material material)
     {
-        renderer.material = material;
+        PlayerDetailsManager.Instance.AddMaterial(type, material);
     }
 }

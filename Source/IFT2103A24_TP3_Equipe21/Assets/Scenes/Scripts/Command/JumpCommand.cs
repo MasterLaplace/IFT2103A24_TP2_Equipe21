@@ -17,7 +17,7 @@ public class JumpCommand : Command
 
     public override void Execute()
     {
-        SoundManager.Instance.PlaySpatialSoundEffect(actor.gameObject, SoundManager.ChooseRandomTrackSoundEffect(), 1.0f, 1.0f, 100.0f);
+        SoundManager.Instance.PlaySpatialSoundEffect(actor.gameObject, SoundManager.ChooseRandomTrackSoundEffect(), 1.0f, 100.0f);
 
         _ = Pool.Instance.Get<Particle>(actor);
 
